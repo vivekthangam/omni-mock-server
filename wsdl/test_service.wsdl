@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="OmniMockSoapService"
+  targetNamespace="http://omnimock.local/soap/service"
+  xmlns="http://schemas.xmlsoap.org/wsdl/"
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+  xmlns:tns="http://omnimock.local/soap/service"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+  <types>
+    <xsd:schema targetNamespace="http://omnimock.local/soap/service">
+      <xsd:element name="GetUserDetailsRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="userId" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="GetUserDetailsResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="id" type="xsd:string"/>
+            <xsd:element name="name" type="xsd:string"/>
+            <xsd:element name="email" type="xsd:string"/>
+            <xsd:element name="status" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="ProcessTransactionRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="accountNumber" type="xsd:string"/>
+            <xsd:element name="amount" type="xsd:double"/>
+            <xsd:element name="currency" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="ProcessTransactionResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="transactionId" type="xsd:string"/>
+            <xsd:element name="status" type="xsd:string"/>
+            <xsd:element name="timestamp" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+    </xsd:schema>
+  </types>
+
+  <message name="GetUserDetailsInput">
+    <part name="parameters" element="tns:GetUserDetailsRequest"/>
+  </message>
+  <message name="GetUserDetailsOutput">
+    <part name="parameters" element="tns:GetUserDetailsResponse"/>
+  </message>
+  <message name="ProcessTransactionInput">
+    <part name="parameters" element="tns:ProcessTransactionRequest"/>
+  </message>
+  <message name="ProcessTransactionOutput">
+    <part name="parameters" element="tns:ProcessTransactionResponse"/>
+  </message>
+
+  <portType name="OmniMockPortType">
+    <operation name="GetUserDetails">
+      <input message="tns:GetUserDetailsInput"/>
+      <output message="tns:GetUserDetailsOutput"/>
+    </operation>
+    <operation name="ProcessTransaction">
+      <input message="tns:ProcessTransactionInput"/>
+      <output message="tns:ProcessTransactionOutput"/>
+    </operation>
+  </portType>
+
+  <binding name="OmniMockSoapBinding" type="tns:OmniMockPortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="GetUserDetails">
+      <soap:operation soapAction="GetUserDetails"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+    <operation name="ProcessTransaction">
+      <soap:operation soapAction="ProcessTransaction"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+  </binding>
+
+  <service name="OmniMockSoapService">
+    <port name="OmniMockPort" binding="tns:OmniMockSoapBinding">
+      <soap:address location="http://localhost:3000/soap/service"/>
+    </port>
+  </service>
+</definitions>

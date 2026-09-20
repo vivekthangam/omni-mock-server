@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OmniMock - Universal Multi-Protocol Studio & Sandbox</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0b0f19;
+      --bg-card: #111827;
+      --bg-card-hover: #1b2436;
+      --border-color: #1f2937;
+      --accent-blue: #38bdf8;
+      --accent-purple: #818cf8;
+      --accent-green: #34d399;
+      --accent-orange: #fb923c;
+      --accent-pink: #f472b6;
+      --accent-red: #f87171;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      line-height: 1.5;
+      padding-bottom: 4rem;
+    }
+
+    header {
+      background: linear-gradient(180deg, #131b2e 0%, var(--bg-primary) 100%);
+      border-bottom: 1px solid var(--border-color);
+      padding: 2.25rem 2rem 1.75rem 2rem;
+      text-align: center;
+      position: relative;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent-blue);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      font-size: 2.4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.35rem;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      max-width: 680px;
+      margin: 0 auto 1.25rem auto;
+      font-size: 0.95rem;
+    }
+
+    .nav-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      background: #111827;
+      border: 1px solid var(--border-color);
+      color: #94a3b8;
+      padding: 0.55rem 1.15rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+    }
+    .tab-btn:hover {
+      background: #1f2937;
+      color: white;
+      border-color: #374151;
+    }
+    .tab-btn.active {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      border-color: #38bdf8;
+      color: white;
+    }
+
+    .container {
+      max-width: 1320px;
+      margin: 1.5rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.55rem 1.15rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .btn:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent-blue);
+      transform: translateY(-1px);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      border-color: #38bdf8;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+    }
+
+    /* Quick Test Bar */
+    .quick-test-bar {
+      background: #111827;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .quick-test-header {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .quick-test-inputs {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .method-select {
+      background: #1f2937;
+      border: 1px solid var(--border-color);
+      color: #38bdf8;
+      font-weight: 700;
+      padding: 0.55rem 0.8rem;
+      border-radius: 6px;
+      outline: none;
+      cursor: pointer;
+      font-family: 'Fira Code', monospace;
+    }
+    .url-input {
+      flex-grow: 1;
+      min-width: 280px;
+      background: #090d16;
+      border: 1px solid var(--border-color);
+      color: white;
+      padding: 0.55rem 0.85rem;
+      border-radius: 6px;
+      outline: none;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.9rem;
+    }
+    .url-input:focus { border-color: var(--accent-blue); }
+    .quick-result-box {
+      background: #090d16;
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 0.75rem;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.8rem;
+      max-height: 200px;
+      overflow-y: auto;
+      display: none;
+      white-space: pre-wrap;
+      color: #a7f3d0;
+    }
+
+    /* Live Audit Terminal */
+    .terminal-section {
+      background: #090d16;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+    .terminal-header {
+      background: #111827;
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .terminal-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-green);
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.2); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    .terminal-body {
+      padding: 0.75rem 1rem;
+      max-height: 280px;
+      overflow-y: auto;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.85rem;
+    }
+    .log-row {
+      padding: 0.35rem 0.5rem;
+      border-radius: 4px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      transition: background 0.15s ease;
+    }
+    .log-row:hover { background: rgba(255, 255, 255, 0.04); }
+    .log-time { color: var(--text-muted); font-size: 0.75rem; min-width: 75px; }
+    .log-proto { font-weight: 600; min-width: 75px; }
+    .log-path { color: var(--text-main); flex-grow: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .log-path a { color: inherit; text-decoration: none; }
+    .log-path a:hover { color: var(--accent-blue); text-decoration: underline; }
+    .log-status { font-weight: 600; min-width: 35px; text-align: right; }
+
+    /* Protocol Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(390px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .card:hover { border-color: #374151; transform: translateY(-2px); }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .proto-tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+    }
+    .tag-rest { background: rgba(56, 189, 248, 0.15); color: var(--accent-blue); }
+    .tag-graphql { background: rgba(244, 114, 182, 0.15); color: var(--accent-pink); }
+    .tag-grpc { background: rgba(52, 211, 153, 0.15); color: var(--accent-green); }
+    .tag-soap { background: rgba(251, 146, 60, 0.15); color: var(--accent-orange); }
+    .tag-ws { background: rgba(129, 140, 248, 0.15); color: var(--accent-purple); }
+
+    .endpoint-list { list-style: none; font-family: 'Fira Code', monospace; font-size: 0.85rem; }
+    .endpoint-list li {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .endpoint-list li:last-child { border-bottom: none; }
+    .endpoint-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .endpoint-link { color: #e2e8f0; text-decoration: none; }
+    .endpoint-link:hover { color: var(--accent-blue); text-decoration: underline; }
+    .endpoint-actions { display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0; }
+    .action-btn {
+      background: #1f2937;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #94a3b8;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+      transition: all 0.15s ease;
+    }
+    .action-btn:hover { background: #374151; color: white; border-color: var(--accent-blue); }
+    .action-open { color: var(--accent-blue); background: rgba(56, 189, 248, 0.1); }
+    .action-open:hover { background: var(--accent-blue); color: #0b0f19; }
+    .method { font-weight: 700; font-size: 0.7rem; padding: 0.15rem 0.4rem; border-radius: 3px; }
+    .get { background: #0369a1; color: white; }
+    .post { background: #15803d; color: white; }
+    .all { background: #6b21a8; color: white; }
+
+    /* Studio UI Panels */
+    .studio-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .panel-title { font-size: 1.1rem; font-weight: 700; color: white; display: flex; justify-content: space-between; align-items: center; }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-group label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); }
+    .studio-input, .studio-textarea, .studio-select {
+      background: #090d16;
+      border: 1px solid var(--border-color);
+      color: white;
+      padding: 0.6rem 0.8rem;
+      border-radius: 6px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.85rem;
+      outline: none;
+    }
+    .studio-textarea { height: 120px; resize: vertical; }
+    .ws-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(248, 113, 113, 0.15);
+      color: var(--accent-red);
+      border: 1px solid rgba(248, 113, 113, 0.3);
+    }
+    .ws-status-badge.connected {
+      background: rgba(52, 211, 153, 0.15);
+      color: var(--accent-green);
+      border-color: rgba(52, 211, 153, 0.3);
+    }
+    .ws-messages-box {
+      background: #090d16;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      height: 380px;
+      overflow-y: auto;
+      padding: 0.75rem;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .ws-msg-row {
+      padding: 0.4rem 0.6rem;
+      border-radius: 4px;
+      background: #111827;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .ws-msg-in { border-left: 3px solid var(--accent-green); }
+    .ws-msg-out { border-left: 3px solid var(--accent-blue); }
+
+    /* Webhook Cards */
+    .webhook-card {
+      background: #090d16;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+    }
+    .webhook-meta { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.8rem; color: var(--text-muted); }
+
+    /* Export Grid */
+    .export-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+    .export-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .export-card h3 { color: white; font-size: 1.2rem; }
+    .export-card p { color: var(--text-muted); font-size: 0.85rem; }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: #1e293b;
+      color: #38bdf8;
+      border: 1px solid #38bdf8;
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      display: none;
+      z-index: 999;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="badge">Universal Multi-Protocol Testbed & Studio</div>
+    <h1>OmniMock Platform</h1>
+    <p class="subtitle">Complete sandbox for REST, GraphQL, gRPC, SOAP, WebSocket, Socket.IO, SSE, Webhooks, Chaos, and Security.</p>
+    
+    <div class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('explorerTab')">🌐 API Explorer</button>
+      <button class="tab-btn" onclick="switchTab('wsStudioTab')">⚡ WebSocket Studio</button>
+      <button class="tab-btn" onclick="switchTab('webhookStudioTab')">📬 Webhook Studio</button>
+      <button class="tab-btn" onclick="switchTab('dbStudioTab')">💾 Mock Database</button>
+      <button class="tab-btn" onclick="switchTab('mockBuilderTab')">🎛️ Custom Mock Builder</button>
+      <button class="tab-btn" onclick="switchTab('chaosTab')">🌪️ Chaos Control</button>
+      <button class="tab-btn" onclick="switchTab('jsonRpcTab')">🔢 JSON-RPC 2.0</button>
+      <button class="tab-btn" onclick="switchTab('exportTab')">📥 Export Collections</button>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- TAB 1: API Explorer & Protocol Cards -->
+    <div id="explorerTab" class="tab-content active">
+      
+      <!-- Quick Test Bar -->
+      <div class="quick-test-bar">
+        <div class="quick-test-header">
+          <span>⚡ <strong>Quick Request Runner</strong> (Test or open any endpoint directly)</span>
+          <span style="font-size: 0.75rem;">Click any endpoint below to auto-fill</span>
+        </div>
+        <div class="quick-test-inputs">
+          <select class="method-select" id="quickMethod">
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
+            <option value="PUT">PUT</option>
+            <option value="DELETE">DELETE</option>
+          </select>
+          <input type="text" class="url-input" id="quickUrl" value="/rest/get" placeholder="/rest/get, /faker/users, /db/products..." />
+          <button class="btn btn-primary" style="padding: 0.55rem 1rem;" onclick="executeQuickTest()">Send Request</button>
+          <button class="btn" style="padding: 0.55rem 0.8rem;" onclick="openQuickUrlInNewTab()">Open URL ↗</button>
+          <button class="btn" style="padding: 0.55rem 0.8rem;" onclick="copyQuickUrl()">Copy URL</button>
+        </div>
+        <div class="quick-result-box" id="quickResult"></div>
+      </div>
+
+      <!-- Live Audit Log Stream -->
+      <div class="terminal-section">
+        <div class="terminal-header">
+          <div class="terminal-title">
+            <div class="live-dot"></div>
+            Live Request & Audit Stream
+          </div>
+          <div>
+            <button class="btn" style="padding: 0.25rem 0.6rem; font-size: 0.8rem;" onclick="clearTerminal()">Clear Logs</button>
+          </div>
+        </div>
+        <div class="terminal-body" id="auditLogs">
+          <div class="log-row" style="color: #64748b;">Waiting for incoming requests across any protocol...</div>
+        </div>
+      </div>
+
+      <!-- Protocol Capabilities Grid -->
+      <div class="grid">
+        
+        <!-- REST & Httpbin -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">REST & Httpbin</div>
+            <span class="proto-tag tag-rest">REST / HTTP 1.1</span>
+          </div>
+          <ul class="endpoint-list">
+            <li>
+              <div class="endpoint-info"><span class="method get">GET</span><a href="/rest/get" target="_blank" class="endpoint-link">/rest/get</a></div>
+              <div class="endpoint-actions"><button class="action-btn" onclick="fillQuickTest('GET', '/rest/get')">Test</button><a href="/rest/get" target="_blank" class="action-btn action-open">Open ↗</a></div>
+            </li>
+            <li>
+              <div class="endpoint-info"><span class="method post">POST</span><span class="endpoint-link">/rest/post</span></div>
+              <div class="endpoint-actions"><button class="action-btn" onclick="fillQuickTest('POST', '/rest/post', '{\"hello\":\"world\"}')">Test</button><button class="action-btn" onclick="copySnippet('curl -X POST http://localhost:3000/rest/post -H \"Content-Type: application/json\" -d \'{\"name\":\"Alice\"}\'')">cURL</button></div>
+            </li>
+            <li>
+              <div class="endpoint-info"><span class="method get">GET</span><a href="/rest/status/429" target="_blank" class="endpoint-link">/rest/status/429</a></div>
+              <div class="endpoint-actions"><button class="action-btn" onclick="fillQuickTest('GET', '/rest/status/429')">Test</button><a href="/rest/status/429" target="_blank" class="action-btn action-open">Open ↗</a></div>
+            </li>
+            <li>
+              <div class="endpoint-info"><span class="method get">GET</span><a href="/rest/delay/1500" target="_blank" class="endpoint-link">/rest/delay/1500</a></div>
+              <div class="endpoint-actions"><button class="action-btn" onclick="fillQuickTest('GET', '/rest/delay/1500')">Test</button><a href="/rest/delay/1500" target="_blank" class="action-btn action-open">Open ↗</a></div>
+            </li>
+            <li>
+              <div class="endpoint-info"><span class="method get">GET</span><a href="/rest/stream/5" target="_blank" class="endpoint-link">/rest/stream/5</a></div>
+              <div class="endpoint-actions"><a href="/rest/stream/5" target="_blank" class="action-btn action-open">Stream ↗</a></div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Faker Mock Engine -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Faker Mock Engine</div>
+            <span class="proto-tag tag-rest">DATA MOCK</span>
+          </div>
+          <ul class="endpoint-list">
+            <li>
+              <div class="endpoint-info"><span class="method get">GET</span><a href="/faker/users?count=5" target="_blank" class="endpoint-link">/faker/users?count=5</a></div>
+              <div class="endpoint-actions"><button class="action-btn" onclick="fillQuickTest('GET', '/faker/users?count=5')">Test</button><a href="/faker/users?count=5" target="_blank" class="action-btn action-open">Open ↗</a></div>
+            </li>
+            <li>
+              <div class="endpoint-info"><span class="method get">GET</span><a href="/faker/products?count=5" target="_blank" class="endpoint-link">/faker/products?count=5</a></div>
+              <div class="endpoint-actions"><button class="action-btn" onclick="fillQuickTest('GET', '/faker/products?count=5')">Test</button><a href="/faker/products?count=5" target="_blank" class="action-btn action-open">Open ↗</a></div>
+            </li>
+            <li>
+              <div class="endpoint-info"><span class="method get">GET</span><a href="/faker/finance?count=5" target="_blank" class="endpoint-link">/faker/finance</a></div>
+              <div class="endpoint-actions"><button class="action-btn" onclick="fillQuickTest('GET', '/faker/finance?count=5')">Test</button><a href="/faker/finance?count=5" target="_blank" class="action-btn action-open">Open ↗</a></div>
+            </li>
+            <li>
+              <div class="endpoint-info"><span class="method post">POST</span><span class="endpoint-link">/faker/custom</span></div>
+              <div class="endpoint-actions"><button class="action-btn" onclick="fillQuickTest('POST', '/faker/custom', '{\"count\":3,\"schema\":{\"id\":\"string.uuid\",\"name\":\"person.fullName\",\"city\":\"location.city\"}}')">Test</button></div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Auth & Security -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Auth & Security Suite</div>
+            <span class="proto-tag tag-rest">SECURITY</span>
+          </div>
+          <ul class="endpoint-list">
+            <li>
+              <div class="endpoint-info"><span class="method get">BASIC</span><a href="/auth/basic/admin/password" target="_blank" class="endpoint-link">/auth/basic/admin/password</a></div>
+              <div class="endpoint-actions"><a href="/auth/basic/admin/password" target="_blank" class="action-btn action-open">Open ↗</a></div>
+            </li>
+            <li>
+              <div class="endpoint-info"><span class="method get">DIGEST</span><a href="/auth/digest/auth/user1/pass1" target="_blank" class="endpoint-link">/auth/digest/auth/...</a></div>
+              <div class="endpoint-actions"><a href="/auth/digest/auth/user1/pass1" target="_blank" class="action-btn action-open">Open ↗</a></div>
+            </li>
+            <li>
+              <div class="endpoint-info"><span class="method post">JWT</span><span class="endpoint-link">/auth/jwt/token</span></div>
+              <div class="endpoint-actions"><button class="action-btn" onclick="generateJwtToken()">Get Token</button></div>
+            </li>
+            <li>
+              <div class="endpoint-info"><span class="method get">APIKEY</span><a href="/auth/apikey/query?api_key=omnimock_secret_api_key_xyz987" target="_blank" class="endpoint-link">/auth/apikey/query</a></div>
+              <div class="endpoint-actions"><a href="/auth/apikey/query?api_key=omnimock_secret_api_key_xyz987" target="_blank" class="action-btn action-open">Open ↗</a></div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Mock OAuth 2.0 & OIDC -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">OAuth 2.0 & OIDC Mock</div>
+            <span class="proto-tag tag-rest">OAUTH 2.0</span>
+          </div>
+          <ul class="endpoint-list">
+            <li>
+              <div class="endpoint-info"><span class="method get">AUTH</span><a href="/oauth/authorize?response_type=code&client_id=lux_app&redirect_uri=http://localhost:3000/rest/get&scope=openid profile email" target="_blank" class="endpoint-link">/oauth/authorize</a></div>
+              <div class="endpoint-actions"><a href="/oauth/authorize?response_type=code&client_id=lux_app&redirect_uri=http://localhost:3000/rest/get&scope=openid profile email" target="_blank" class="action-btn action-open">Authorize UI ↗</a></div>
+            </li>
+            <li>
+              <div class="endpoint-info"><span class="method post">TOKEN</span><span class="endpoint-link">/oauth/token (Client Creds)</span></div>
+              <div class="endpoint-actions"><button class="action-btn" onclick="fillQuickTest('POST', '/oauth/token', 'grant_type=client_credentials&client_id=my_app&client_secret=secret123&scope=read write')">Test</button></div>
+            </li>
+            <li>
+              <div class="endpoint-info"><span class="method get">OIDC</span><a href="/.well-known/openid-configuration" target="_blank" class="endpoint-link">/.well-known/openid-configuration</a></div>
+              <div class="endpoint-actions"><a href="/.well-known/openid-configuration" target="_blank" class="action-btn action-open">Open ↗</a></div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- GraphQL -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">GraphQL Yoga</div>
+            <span class="proto-tag tag-graphql">GRAPHQL</span>
+          </div>
+          <ul class="endpoint-list">
+            <li>
+              <div class="endpoint-info"><span class="method get">IDE</span><a href="/graphql" target="_blank" class="endpoint-link">/graphql (GraphiQL Playground)</a></div>
+              <div class="endpoint-actions"><a href="/graphql" target="_blank" class="action-btn action-open">Open IDE ↗</a></div>
+            </li>
+            <li>
+              <div class="endpoint-info"><span class="method post">QUERY</span><span class="endpoint-link">Query Users &amp; Products</span></div>
+              <div class="endpoint-actions"><button class="action-btn" onclick="fillQuickTest('POST', '/graphql', '{\"query\":\"{ users(limit: 2) { id name email } }\"}')">Run Query</button></div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- SOAP & XML -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">SOAP 1.1 / 1.2 XML</div>
+            <span class="proto-tag tag-soap">SOAP / XML</span>
+          </div>
+          <ul class="endpoint-list">
+            <li>
+              <div class="endpoint-info"><span class="method get">WSDL</span><a href="/soap/service?wsdl" target="_blank" class="endpoint-link">/soap/service?wsdl</a></div>
+              <div class="endpoint-actions"><a href="/soap/service?wsdl" target="_blank" class="action-btn action-open">View WSDL ↗</a></div>
+            </li>
+            <li>
+              <div class="endpoint-info"><span class="method post">SOAP</span><span class="endpoint-link">GetUserDetails Envelope</span></div>
+              <div class="endpoint-actions"><button class="action-btn" onclick="fillQuickTest('POST', '/soap/service', '<?xml version=\"1.0\" encoding=\"UTF-8\"?><soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:tns=\"http://omnimock.local/soap/service\"><soap:Body><tns:GetUserDetailsRequest><userId>usr_777</userId></tns:GetUserDetailsRequest></soap:Body></soap:Envelope>')">Send SOAP</button></div>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TAB 2: WebSocket Interactive Studio -->
+    <div id="wsStudioTab" class="tab-content">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+        <div class="studio-panel">
+          <div class="panel-title">
+            <span>⚡ WebSocket Connection</span>
+            <span id="wsStatusBadge" class="ws-status-badge">Disconnected</span>
+          </div>
+          <div class="form-group">
+            <label>WebSocket Server URL:</label>
+            <input type="text" id="wsUrlInput" class="studio-input" value="ws://localhost:3000/ws/echo" />
+          </div>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button class="btn btn-primary" id="wsConnectBtn" onclick="toggleWsConnection()">Connect</button>
+            <button class="btn" onclick="selectWsPreset('/ws/echo')">Echo</button>
+            <button class="btn" onclick="selectWsPreset('/ws/ticker')">BTC Ticker</button>
+            <button class="btn" onclick="selectWsPreset('/ws/chat')">Chat</button>
+            <button class="btn" onclick="selectWsPreset('/ws/audit')">Live Audit</button>
+          </div>
+          <div class="form-group" style="margin-top: 0.5rem;">
+            <label>Message Frame Payload (Text or JSON):</label>
+            <textarea id="wsMessageInput" class="studio-textarea">{"event": "ping", "message": "Hello OmniMock WebSocket!"}</textarea>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <button class="btn btn-primary" onclick="sendWsMessage()">Send Frame 🚀</button>
+            <button class="btn" onclick="clearWsMessages()">Clear Log</button>
+          </div>
+        </div>
+
+        <div class="studio-panel">
+          <div class="panel-title">
+            <span>📡 Live WebSocket Frame Monitor</span>
+            <span id="wsMsgCount" style="font-size: 0.8rem; color: var(--text-muted);">0 frames</span>
+          </div>
+          <div class="ws-messages-box" id="wsMessagesBox">
+            <div style="color: #64748b;">Connect to a WebSocket endpoint to view live frame traffic...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: Webhook Replay Studio -->
+    <div id="webhookStudioTab" class="tab-content">
+      <div class="studio-panel">
+        <div class="panel-title">
+          <span>📬 Webhook Receiver & Replay Studio</span>
+          <button class="btn btn-primary" onclick="createAndSelectWebhookInbox()">+ Create New Inbox</button>
+        </div>
+        <p style="font-size: 0.9rem; color: var(--text-muted);">
+          Current Active Webhook Inbox: <strong id="currentInboxDisplay" style="color: #38bdf8;">None (Click create above)</strong>
+        </p>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+          <button class="btn" onclick="sendSampleWebhook('order.created', { orderId: 'ord_123', amount: 89.99, status: 'PAID' })">Send Mock: Order Created</button>
+          <button class="btn" onclick="sendSampleWebhook('user.registered', { userId: 'usr_456', email: 'dev@test.com' })">Send Mock: User Registered</button>
+          <button class="btn" onclick="refreshWebhookRequests()">🔄 Refresh Received</button>
+        </div>
+      </div>
+      <div class="studio-panel">
+        <div class="panel-title">
+          <span>📥 Received Webhooks</span>
+          <span id="webhookCount" style="font-size: 0.8rem; color: var(--text-muted);">0 captured</span>
+        </div>
+        <div id="webhookListContainer">
+          <div style="color: #64748b; padding: 1rem; text-align: center;">No webhooks received on this inbox yet.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: Mock Database Studio -->
+    <div id="dbStudioTab" class="tab-content">
+      <div class="studio-panel">
+        <div class="panel-title">
+          <span>💾 In-Memory Stateful Database</span>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn" onclick="fetchDbCollection('users')">Users</button>
+            <button class="btn" onclick="fetchDbCollection('products')">Products</button>
+            <button class="btn" onclick="fetchDbCollection('posts')">Posts</button>
+            <button class="btn" onclick="resetDbSeeded()">Reset Seed Data</button>
+          </div>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <input type="text" id="dbSearchInput" class="studio-input" style="flex-grow: 1;" placeholder="Search or filter query (e.g. ?role=ADMIN or ?price_gte=50)" />
+          <button class="btn btn-primary" onclick="queryDbWithFilter()">Filter</button>
+        </div>
+        <pre id="dbResultBox" style="background:#090d16; border:1px solid var(--border-color); border-radius:8px; padding:1rem; font-family:'Fira Code', monospace; font-size:0.8rem; max-height:400px; overflow-y:auto; color:#a7f3d0;">Click a collection above to browse records...</pre>
+      </div>
+    </div>
+
+    <!-- TAB 5: Custom Mock Builder Studio -->
+    <div id="mockBuilderTab" class="tab-content">
+      <div class="studio-panel">
+        <div class="panel-title">
+          <span>🎛️ Dynamic Custom Mock Route Creator</span>
+          <button class="btn btn-primary" onclick="loadMockRulesList()">Refresh Rules</button>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label>Mock Name:</label>
+            <input type="text" id="mockName" class="studio-input" value="Custom Checkout API" />
+          </div>
+          <div class="form-group">
+            <label>HTTP Method & Path:</label>
+            <div style="display: flex; gap: 0.5rem;">
+              <select id="mockMethod" class="studio-select" style="width: 100px;">
+                <option value="GET">GET</option>
+                <option value="POST">POST</option>
+                <option value="PUT">PUT</option>
+                <option value="DELETE">DELETE</option>
+                <option value="ALL">ALL</option>
+              </select>
+              <input type="text" id="mockPath" class="studio-input" style="flex-grow: 1;" value="/custom/checkout" />
+            </div>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label>Status Code & Delay (ms):</label>
+            <div style="display: flex; gap: 0.5rem;">
+              <input type="number" id="mockStatus" class="studio-input" value="200" style="width: 120px;" />
+              <input type="number" id="mockDelay" class="studio-input" value="0" placeholder="Delay ms" style="flex-grow: 1;" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Response Body Template (Supports {{person.fullName}}, {{string.uuid}}, {{date}}):</label>
+            <textarea id="mockBody" class="studio-textarea">{\n  "orderId": "{{string.uuid}}",\n  "customer": "{{person.fullName}}",\n  "status": "APPROVED",\n  "timestamp": "{{date}}"\n}</textarea>
+          </div>
+        </div>
+        <div>
+          <button class="btn btn-primary" onclick="createCustomMockRule()">+ Register Custom Mock Route</button>
+        </div>
+      </div>
+      <div class="studio-panel">
+        <div class="panel-title">
+          <span>Active Registered Mock Rules</span>
+        </div>
+        <div id="mockRulesListContainer" style="font-family:'Fira Code', monospace; font-size:0.85rem;">
+          Loading mock rules...
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 6: Chaos Control Panel -->
+    <div id="chaosTab" class="tab-content">
+      <div class="studio-panel">
+        <div class="panel-title">
+          <span>🌪️ Chaos Engineering & Fault Injection Control</span>
+          <span id="chaosStatusText" style="font-size:0.85rem; color:var(--accent-green);">Ready</span>
+        </div>
+        <p style="font-size:0.85rem; color:var(--text-muted);">
+          Inject latency, drop connections, force HTTP error statuses, or corrupt responses globally or on-demand using request headers.
+        </p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label>Global Chaos Enabled:</label>
+            <select id="chaosEnabled" class="studio-select">
+              <option value="false">Disabled (Normal Operations)</option>
+              <option value="true">Enabled (Apply Chaos to All Requests)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Global Latency Delay (ms):</label>
+            <input type="number" id="chaosDelay" class="studio-input" value="0" placeholder="0 = no delay" />
+          </div>
+          <div class="form-group">
+            <label>Global Error Rate (%):</label>
+            <input type="number" id="chaosErrorRate" class="studio-input" value="0" min="0" max="100" placeholder="0 to 100%" />
+          </div>
+          <div class="form-group">
+            <label>Global Injected Status Code:</label>
+            <input type="number" id="chaosStatus" class="studio-input" value="500" />
+          </div>
+        </div>
+
+        <div>
+          <button class="btn btn-primary" onclick="saveChaosSettings()">Update Chaos Settings</button>
+        </div>
+
+        <div style="background:#090d16; border:1px solid var(--border-color); border-radius:8px; padding:1rem; margin-top:1rem;">
+          <h4 style="color:white; margin-bottom:0.5rem; font-size:0.9rem;">Per-Request Header Controlled Chaos (No Server Reconfig Needed):</h4>
+          <ul style="list-style:none; font-family:'Fira Code', monospace; font-size:0.8rem; color:#cbd5e1; display:flex; flex-direction:column; gap:0.4rem;">
+            <li><span style="color:#38bdf8;">X-Chaos-Delay: 2500</span> - Injects 2.5s network latency</li>
+            <li><span style="color:#38bdf8;">X-Chaos-Status: 503</span> - Forces HTTP 503 Service Unavailable</li>
+            <li><span style="color:#38bdf8;">X-Chaos-Drop-Rate: 50</span> - 50% probability of dropping the TCP connection abruptly</li>
+            <li><span style="color:#38bdf8;">X-Chaos-Corrupt: true</span> - Sends malformed/truncated JSON payload</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 7: JSON-RPC 2.0 Studio -->
+    <div id="jsonRpcTab" class="tab-content">
+      <div class="studio-panel">
+        <div class="panel-title">
+          <span>🔢 JSON-RPC 2.0 Client Studio</span>
+          <span class="proto-tag tag-rest">JSON-RPC 2.0</span>
+        </div>
+        <p style="font-size:0.85rem; color:var(--text-muted);">Endpoint: <code>POST /rpc/json</code> (Supports single requests, batch calls, notifications)</p>
+        
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button class="btn" onclick="setJsonRpcPayload('calculate', { op: 'add', a: 25, b: 17 })">Sample: calculate (25 + 17)</button>
+          <button class="btn" onclick="setJsonRpcPayload('getUser', { id: 'usr_99' })">Sample: getUser</button>
+          <button class="btn" onclick="setJsonRpcPayload('getBlockchainBlock', { blockNumber: 19284712 })">Sample: getBlockchainBlock</button>
+          <button class="btn" onclick="setJsonRpcBatchPayload()">Sample: Batch Request (3 RPCs)</button>
+        </div>
+
+        <div class="form-group">
+          <label>JSON-RPC Request Body:</label>
+          <textarea id="jsonRpcInput" class="studio-textarea" style="height: 140px;">{\n  "jsonrpc": "2.0",\n  "method": "calculate",\n  "params": { "op": "add", "a": 10, "b": 25 },\n  "id": 1\n}</textarea>
+        </div>
+
+        <div>
+          <button class="btn btn-primary" onclick="sendJsonRpcRequest()">Execute JSON-RPC 🚀</button>
+        </div>
+
+        <div class="form-group">
+          <label>JSON-RPC Response:</label>
+          <pre id="jsonRpcOutput" style="background:#090d16; border:1px solid var(--border-color); border-radius:8px; padding:1rem; font-family:'Fira Code', monospace; font-size:0.8rem; color:#a7f3d0; max-height:250px; overflow-y:auto;">Execute a request to see output...</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 8: Export Collections Studio -->
+    <div id="exportTab" class="tab-content">
+      <div class="export-grid">
+        <div class="export-card">
+          <div>
+            <h3>🚀 Postman Collection (v2.1)</h3>
+            <p>Export pre-configured collection containing every REST verb, dynamic Faker generator, Basic Auth, Digest Auth, Bearer JWT, OAuth2, and GraphQL request.</p>
+          </div>
+          <a href="/export/postman" class="btn btn-primary" download>📥 Download Postman Collection</a>
+        </div>
+        <div class="export-card">
+          <div>
+            <h3>💎 Lux-API / Workspace Bundle</h3>
+            <p>Export native workspace configuration for Lux-API including organized protocol folders, environments, and test templates.</p>
+          </div>
+          <a href="/export/lux-api" class="btn btn-primary" download>📥 Download Lux-API Workspace</a>
+        </div>
+        <div class="export-card">
+          <div>
+            <h3>📖 OpenAPI 3.1 Specification</h3>
+            <p>Standard OpenAPI 3.1 JSON specification importable into Swagger UI, Postman, Insomnia, or API gateways.</p>
+          </div>
+          <a href="/openapi.json" target="_blank" class="btn">View OpenAPI 3.1 JSON ↗</a>
+        </div>
+        <div class="export-card">
+          <div>
+            <h3>📜 SOAP WSDL Schema</h3>
+            <p>Standard XML WSDL schema definition for testing SOAP 1.1 / 1.2 clients and SoapUI projects.</p>
+          </div>
+          <a href="/soap/service?wsdl" target="_blank" class="btn">Download SOAP WSDL ↗</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="toast">Notification</div>
+
+  <script>
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.currentTarget.classList.add('active');
+
+      if (tabId === 'mockBuilderTab') loadMockRulesList();
+      if (tabId === 'dbStudioTab') fetchDbCollection('users');
+    }
+
+    const auditContainer = document.getElementById('auditLogs');
+    const quickResult = document.getElementById('quickResult');
+    const toast = document.getElementById('toast');
+    let hasLogs = false;
+
+    function showToast(msg) {
+      toast.textContent = msg || 'Action completed!';
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 2500);
+    }
+
+    function copySnippet(text) {
+      navigator.clipboard.writeText(text);
+      showToast('Copied: ' + text.slice(0, 35) + '...');
+    }
+
+    function fillQuickTest(method, url, body) {
+      document.getElementById('quickMethod').value = method;
+      document.getElementById('quickUrl').value = url;
+      if (body) {
+        executeQuickTest(body);
+      } else if (method === 'GET') {
+        executeQuickTest();
+      }
+    }
+
+    function openQuickUrlInNewTab() {
+      const url = document.getElementById('quickUrl').value.trim();
+      window.open(url.startsWith('http') ? url : window.location.origin + url, '_blank');
+    }
+
+    function copyQuickUrl() {
+      const url = document.getElementById('quickUrl').value.trim();
+      copySnippet(url.startsWith('http') ? url : window.location.origin + url);
+    }
+
+    async function executeQuickTest(customBody) {
+      const method = document.getElementById('quickMethod').value;
+      const url = document.getElementById('quickUrl').value.trim();
+      quickResult.style.display = 'block';
+      quickResult.textContent = `Sending ${method} ${url}...`;
+
+      try {
+        const isJson = customBody && customBody.trim().startsWith('{');
+        const isXml = customBody && customBody.trim().startsWith('<?xml');
+
+        const headers = {};
+        if (isJson) headers['Content-Type'] = 'application/json';
+        else if (isXml) {
+          headers['Content-Type'] = 'text/xml; charset=utf-8';
+          headers['SOAPAction'] = 'GetUserDetails';
+        }
+
+        const res = await fetch(url, {
+          method,
+          headers,
+          body: method !== 'GET' && method !== 'HEAD' ? customBody || (isJson ? '{}' : undefined) : undefined,
+        });
+
+        const contentType = res.headers.get('content-type') || '';
+        let data;
+        if (contentType.includes('application/json')) {
+          data = JSON.stringify(await res.json(), null, 2);
+        } else {
+          data = await res.text();
+        }
+
+        quickResult.textContent = `HTTP ${res.status} ${res.statusText}\n\n${data}`;
+      } catch (err) {
+        quickResult.textContent = `Request failed: ${err.message}`;
+      }
+    }
+
+    async function generateJwtToken() {
+      try {
+        const res = await fetch('/auth/jwt/token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sub: 'user_123', name: 'UI Tester', role: 'admin' }),
+        });
+        const json = await res.json();
+        copySnippet(json.access_token);
+        showToast('JWT Access Token copied!');
+      } catch (err) {
+        alert('Failed: ' + err.message);
+      }
+    }
+
+    // WebSocket Studio Logic
+    let wsClient = null;
+    let wsFrameCount = 0;
+
+    function selectWsPreset(path) {
+      const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      document.getElementById('wsUrlInput').value = `${proto}//${window.location.host}${path}`;
+      if (wsClient) toggleWsConnection();
+      toggleWsConnection();
+    }
+
+    function toggleWsConnection() {
+      const btn = document.getElementById('wsConnectBtn');
+      const badge = document.getElementById('wsStatusBadge');
+      const url = document.getElementById('wsUrlInput').value.trim();
+
+      if (wsClient && (wsClient.readyState === WebSocket.OPEN || wsClient.readyState === WebSocket.CONNECTING)) {
+        wsClient.close();
+        wsClient = null;
+        badge.textContent = 'Disconnected';
+        badge.classList.remove('connected');
+        btn.textContent = 'Connect';
+        appendWsLog('System', 'WebSocket connection closed.');
+        return;
+      }
+
+      try {
+        badge.textContent = 'Connecting...';
+        wsClient = new WebSocket(url);
+        wsClient.onopen = () => {
+          badge.textContent = 'Connected';
+          badge.classList.add('connected');
+          btn.textContent = 'Disconnect';
+          appendWsLog('System', `Connected to ${url}`);
+        };
+        wsClient.onmessage = (event) => { appendWsLog('In', event.data, 'in'); };
+        wsClient.onclose = () => {
+          badge.textContent = 'Disconnected';
+          badge.classList.remove('connected');
+          btn.textContent = 'Connect';
+        };
+      } catch (err) {
+        alert('Connection error: ' + err.message);
+      }
+    }
+
+    function sendWsMessage() {
+      if (!wsClient || wsClient.readyState !== WebSocket.OPEN) {
+        alert('Please connect to a WebSocket endpoint first.');
+        return;
+      }
+      const msg = document.getElementById('wsMessageInput').value;
+      wsClient.send(msg);
+      appendWsLog('Out', msg, 'out');
+    }
+
+    function appendWsLog(dir, msg, type = 'in') {
+      const box = document.getElementById('wsMessagesBox');
+      const row = document.createElement('div');
+      row.className = `ws-msg-row ${type === 'in' ? 'ws-msg-in' : type === 'out' ? 'ws-msg-out' : ''}`;
+      const time = new Date().toLocaleTimeString();
+      row.innerHTML = `<span style="color:#64748b; font-size:0.75rem;">[${time}] [${dir}]</span>\n${typeof msg === 'object' ? JSON.stringify(msg, null, 2) : msg}`;
+      box.appendChild(row);
+      box.scrollTop = box.scrollHeight;
+      wsFrameCount++;
+      document.getElementById('wsMsgCount').textContent = `${wsFrameCount} frames`;
+    }
+
+    function clearWsMessages() {
+      document.getElementById('wsMessagesBox').innerHTML = '<div style="color: #64748b;">Cleared messages log.</div>';
+      wsFrameCount = 0;
+      document.getElementById('wsMsgCount').textContent = '0 frames';
+    }
+
+    // Webhook Studio Logic
+    let currentActiveInboxId = null;
+
+    async function createAndSelectWebhookInbox() {
+      try {
+        const res = await fetch('/webhooks/inboxes', { method: 'POST' });
+        const json = await res.json();
+        currentActiveInboxId = json.inboxId;
+        document.getElementById('currentInboxDisplay').textContent = `${window.location.origin}${json.webhookUrl}`;
+        showToast(`Created Inbox: ${json.inboxId}`);
+        refreshWebhookRequests();
+      } catch (err) {
+        alert('Failed: ' + err.message);
+      }
+    }
+
+    async function sendSampleWebhook(eventName, payload) {
+      if (!currentActiveInboxId) await createAndSelectWebhookInbox();
+      await fetch(`/webhooks/inbox/${currentActiveInboxId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Event-Name': eventName },
+        body: JSON.stringify(payload),
+      });
+      showToast(`Fired mock webhook: ${eventName}`);
+      refreshWebhookRequests();
+    }
+
+    async function refreshWebhookRequests() {
+      if (!currentActiveInboxId) return;
+      const container = document.getElementById('webhookListContainer');
+      try {
+        const res = await fetch(`/webhooks/inbox/${currentActiveInboxId}/requests`);
+        const json = await res.json();
+        const requests = json.requests || [];
+        document.getElementById('webhookCount').textContent = `${requests.length} captured`;
+
+        if (requests.length === 0) {
+          container.innerHTML = '<div style="color: #64748b; padding: 1rem; text-align: center;">No webhooks received yet.</div>';
+          return;
+        }
+
+        container.innerHTML = requests.map(req => `
+          <div class="webhook-card">
+            <div class="webhook-meta">
+              <span><strong>${req.method}</strong> from ${req.clientIp}</span>
+              <span>${new Date(req.timestamp).toLocaleTimeString()}</span>
+            </div>
+            <pre style="font-family:'Fira Code', monospace; font-size:0.8rem; color:#a7f3d0; margin-bottom:0.5rem;">${JSON.stringify(req.body, null, 2)}</pre>
+            <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
+              <button class="action-btn" onclick="copySnippet('${JSON.stringify(req.body).replace(/'/g, "\\'")}')">Copy Payload</button>
+              <button class="action-btn action-open" onclick="replayWebhookPayload('${JSON.stringify(req.body).replace(/'/g, "\\'")}')">Replay 🚀</button>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function replayWebhookPayload(bodyStr) {
+      const targetUrl = prompt('Enter destination URL to replay webhook to:', `${window.location.origin}/rest/post`);
+      if (!targetUrl) return;
+      try {
+        const res = await fetch('/webhooks/dispatch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ targetUrl, payload: JSON.parse(bodyStr) }),
+        });
+        const json = await res.json();
+        alert(`Replayed successfully!\nStatus: ${json.responseStatus}\nTarget: ${targetUrl}`);
+      } catch (err) {
+        alert('Replay failed: ' + err.message);
+      }
+    }
+
+    // Database Studio Logic
+    let currentDbCollection = 'users';
+    async function fetchDbCollection(col) {
+      currentDbCollection = col;
+      const res = await fetch(`/db/${col}`);
+      const json = await res.json();
+      document.getElementById('dbResultBox').textContent = JSON.stringify(json, null, 2);
+    }
+
+    async function queryDbWithFilter() {
+      const query = document.getElementById('dbSearchInput').value.trim();
+      const res = await fetch(`/db/${currentDbCollection}${query.startsWith('?') ? query : (query ? '?' + query : '')}`);
+      const json = await res.json();
+      document.getElementById('dbResultBox').textContent = JSON.stringify(json, null, 2);
+    }
+
+    async function resetDbSeeded() {
+      await fetch('/db/reset', { method: 'POST' });
+      showToast('Database reset to fresh seeds!');
+      fetchDbCollection(currentDbCollection);
+    }
+
+    // Custom Mock Builder Logic
+    async function loadMockRulesList() {
+      const container = document.getElementById('mockRulesListContainer');
+      const res = await fetch('/mocks');
+      const json = await res.json();
+      const rules = json.rules || [];
+      if (rules.length === 0) {
+        container.innerHTML = '<div style="color:#64748b;">No active mock rules registered.</div>';
+        return;
+      }
+      container.innerHTML = rules.map(r => `
+        <div style="background:#090d16; border:1px solid var(--border-color); border-radius:6px; padding:0.75rem; margin-bottom:0.5rem; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <strong>${r.name}</strong> - <span style="color:#38bdf8;">${r.method} ${r.path}</span> -> <span style="color:#34d399;">HTTP ${r.statusCode}</span> (Hits: ${r.hitCount})
+          </div>
+          <div style="display:flex; gap:0.4rem;">
+            <a href="${r.path}" target="_blank" class="action-btn action-open">Test ↗</a>
+            <button class="action-btn" onclick="deleteMockRule('${r.id}')">Delete</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function createCustomMockRule() {
+      const name = document.getElementById('mockName').value;
+      const method = document.getElementById('mockMethod').value;
+      const path = document.getElementById('mockPath').value;
+      const statusCode = parseInt(document.getElementById('mockStatus').value, 10);
+      const delayMs = parseInt(document.getElementById('mockDelay').value, 10) || 0;
+      let responseBody;
+      try {
+        responseBody = JSON.parse(document.getElementById('mockBody').value);
+      } catch {
+        responseBody = document.getElementById('mockBody').value;
+      }
+
+      await fetch('/mocks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, method, path, statusCode, delayMs, responseBody }),
+      });
+      showToast(`Mock rule '${name}' registered!`);
+      loadMockRulesList();
+    }
+
+    async function deleteMockRule(id) {
+      await fetch(`/mocks/${id}`, { method: 'DELETE' });
+      showToast('Mock rule deleted');
+      loadMockRulesList();
+    }
+
+    // Chaos Control Logic
+    async function saveChaosSettings() {
+      const enabled = document.getElementById('chaosEnabled').value === 'true';
+      const globalDelayMs = parseInt(document.getElementById('chaosDelay').value, 10) || 0;
+      const globalErrorRate = parseInt(document.getElementById('chaosErrorRate').value, 10) || 0;
+      const globalStatusCode = parseInt(document.getElementById('chaosStatus').value, 10) || 500;
+
+      await fetch('/chaos/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled, globalDelayMs, globalErrorRate, globalStatusCode }),
+      });
+      showToast('Chaos settings saved!');
+    }
+
+    // JSON-RPC Studio Logic
+    function setJsonRpcPayload(method, params) {
+      document.getElementById('jsonRpcInput').value = JSON.stringify({
+        jsonrpc: '2.0',
+        method,
+        params,
+        id: Math.floor(Math.random() * 1000),
+      }, null, 2);
+      sendJsonRpcRequest();
+    }
+
+    function setJsonRpcBatchPayload() {
+      document.getElementById('jsonRpcInput').value = JSON.stringify([
+        { jsonrpc: '2.0', method: 'serverTime', id: 1 },
+        { jsonrpc: '2.0', method: 'getUser', params: { id: 'usr_batch' }, id: 2 },
+        { jsonrpc: '2.0', method: 'calculate', params: { op: 'multiply', a: 6, b: 7 }, id: 3 }
+      ], null, 2);
+      sendJsonRpcRequest();
+    }
+
+    async function sendJsonRpcRequest() {
+      const bodyStr = document.getElementById('jsonRpcInput').value;
+      const out = document.getElementById('jsonRpcOutput');
+      out.textContent = 'Executing JSON-RPC 2.0...';
+      try {
+        const res = await fetch('/rpc/json', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: bodyStr,
+        });
+        const json = await res.json();
+        out.textContent = JSON.stringify(json, null, 2);
+      } catch (err) {
+        out.textContent = `RPC Execution Error: ${err.message}`;
+      }
+    }
+
+    // Live Audit Stream
+    const eventSource = new EventSource('/audit/stream');
+    eventSource.onmessage = function(event) {
+      try {
+        const log = JSON.parse(event.data);
+        if (!hasLogs) {
+          auditContainer.innerHTML = '';
+          hasLogs = true;
+        }
+
+        const row = document.createElement('div');
+        row.className = 'log-row';
+        const time = new Date(log.timestamp).toLocaleTimeString();
+        const statusColor = log.responseStatus >= 400 ? 'var(--accent-red)' : 'var(--accent-green)';
+
+        row.innerHTML = `
+          <span class="log-time">${time}</span>
+          <span class="log-proto" style="color: var(--accent-blue);">[${log.protocol}]</span>
+          <span style="color: #cbd5e1; font-weight:600; min-width:55px;">${log.method}</span>
+          <span class="log-path"><a href="${log.path}" target="_blank">${log.path}</a></span>
+          ${log.responseStatus ? `<span class="log-status" style="color: ${statusColor};">${log.responseStatus}</span>` : ''}
+          ${log.latencyMs !== undefined ? `<span style="color: #64748b; font-size:0.75rem; min-width:45px; text-align:right;">${log.latencyMs}ms</span>` : ''}
+          <button class="action-btn" style="padding: 0.1rem 0.35rem; font-size:0.7rem;" onclick="fillQuickTest('${log.method}', '${log.path}')">Try</button>
+        `;
+
+        auditContainer.prepend(row);
+      } catch (err) {
+        console.error('Failed to parse audit log:', err);
+      }
+    };
+
+    function clearTerminal() {
+      auditContainer.innerHTML = '<div class="log-row" style="color: #64748b;">Audit stream cleared. Waiting for next request...</div>';
+      hasLogs = false;
+    }
+  </script>
+</body>
+</html>

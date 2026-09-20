@@ -1,0 +1,54 @@
+{
+  "name": "omni-mock-server",
+  "version": "1.0.0",
+  "description": "Universal Multi-Protocol API Mock and Testbed Server (REST, GraphQL, gRPC, SOAP, WebSocket, Socket.IO, SSE, Webhooks, Auth, Faker)",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts",
+    "dev:tsnode": "ts-node --transpile-only src/server.ts",
+    "dev:legacy": "ts-node-dev --respawn --transpile-only src/server.ts"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^8.4.1",
+    "@graphql-tools/schema": "^10.0.3",
+    "@grpc/grpc-js": "^1.10.6",
+    "@grpc/proto-loader": "^0.7.12",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "fast-xml-parser": "^4.3.6",
+    "graphql": "^16.8.1",
+    "graphql-yoga": "^5.3.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "socket.io": "^4.7.5",
+    "swagger-ui-express": "^5.0.0",
+    "uuid": "^9.0.1",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.7",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/multer": "^1.4.11",
+    "@types/node": "^20.12.7",
+    "@types/swagger-ui-express": "^4.1.6",
+    "@types/uuid": "^9.0.8",
+    "@types/ws": "^8.5.10",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "tsx": "^4.7.2",
+    "typescript": "^5.4.5"
+  },
+
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": []
+  }
+}

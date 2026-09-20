@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: omnimock-server
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: oregon
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+    healthCheckPath: /rest/get

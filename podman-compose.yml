@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  omnimock:
+    build:
+      context: .
+      dockerfile: Containerfile
+    container_name: omnimock-server
+    ports:
+      - "3000:3000"
+      - "50051:50051"
+    environment:
+      - PORT=3000
+      - GRPC_PORT=50051
+      - JWT_SECRET=omnimock-super-secret-jwt-key-change-me
+      - NODE_ENV=production
+    restart: unless-stopped
