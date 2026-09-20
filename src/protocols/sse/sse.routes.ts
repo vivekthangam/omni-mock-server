@@ -82,4 +82,86 @@ router.get('/stocks', (req: Request, res: Response) => {
   });
 });
 
+// Notifications & System Alerts SSE
+router.get('/notifications', (req: Request, res: Response) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders?.();
+
+  res.write('retry: 5000\n\n');
+
+  const alerts = [
+    { type: 'INFO', title: 'Backup Completed', detail: 'Database backup snapshot created in AWS S3' },
+    { type: 'WARNING', title: 'High Memory Pressure', detail: 'Worker node 3 heap reached 82%' },
+    { type: 'SECURITY', title: 'New Device Login', detail: 'Admin login detected from 192.168.1.100' },
+    { type: 'SUCCESS', title: 'Deployment Live', detail: 'OmniMock release v1.4.2 promoted to prod' },
+  ];
+
+  let id = 0;
+  const timer = setInterval(() => {
+    id++;
+    const alert = alerts[Math.floor(Math.random() * alerts.length)];
+    const payload = {
+      id: `alert_${id}`,
+      ...alert,
+      timestamp: new Date().toISOString(),
+    };
+
+    res.write('event: notification\n');
+    res.write(`id: ${id}\n`);
+    res.write(`data: ${JSON.stringify(payload)}\n\n`);
+  }, 2000);
+
+  req.on('close', () => {
+    clearInterval(timer);
+  });
+});
+
+// Finite Build Logs Progress Stream
+router.get('/build-logs', (req: Request, res: Response) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders?.();
+
+  const steps = [
+    'Initializing build environment in runner-us-east-1a...',
+    'Cloning git repository vivekthangam/omni-mock-server (main)...',
+    'Resolving pnpm dependencies from store cache...',
+    'Compiling TypeScript modules (tsc --project tsconfig.json)...',
+    'Running multi-protocol integration test matrix...',
+    'Packaging Docker container image omnimock:latest...',
+    'Publishing artifact manifest to cloud registry...',
+    'Build and verification completed successfully (0 errors, 14 suites passed).',
+  ];
+
+  let current = 0;
+  const timer = setInterval(() => {
+    if (current >= steps.length) {
+      res.write('event: build-complete\n');
+      res.write(`data: ${JSON.stringify({ status: 'SUCCESS', exitCode: 0, durationSec: 8 })}\n\n`);
+      clearInterval(timer);
+      res.end();
+      return;
+    }
+
+    const payload = {
+      step: current + 1,
+      totalSteps: steps.length,
+      log: steps[current],
+      timestamp: new Date().toISOString(),
+    };
+
+    res.write('event: log\n');
+    res.write(`id: ${current + 1}\n`);
+    res.write(`data: ${JSON.stringify(payload)}\n\n`);
+    current++;
+  }, 1000);
+
+  req.on('close', () => {
+    clearInterval(timer);
+  });
+});
+
 export default router;

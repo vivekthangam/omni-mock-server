@@ -89,8 +89,36 @@ router.post('/service', (req: Request, res: Response) => {
     return res.send(responseXml);
   }
 
+  if (body.CheckInventoryRequest || soapAction.includes('CheckInventory')) {
+    const reqData = body.CheckInventoryRequest || {};
+    const sku = reqData.sku || 'SKU-OMNI-900';
+    const warehouseId = reqData.warehouseId || 'WH-EAST-1';
+    const inStock = !sku.includes('OUT');
+    const quantity = inStock ? 142 : 0;
+
+    const responseXml = `<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="http://omnimock.local/soap/service">
+  <soap:Body>
+    <tns:CheckInventoryResponse>
+      <tns:sku>${sku}</tns:sku>
+      <tns:warehouseId>${warehouseId}</tns:warehouseId>
+      <tns:inStock>${inStock}</tns:inStock>
+      <tns:quantity>${quantity}</tns:quantity>
+      <tns:leadTimeDays>${inStock ? 2 : 14}</tns:leadTimeDays>
+    </tns:CheckInventoryResponse>
+  </soap:Body>
+</soap:Envelope>`;
+
+    res.setHeader('Content-Type', 'text/xml; charset=utf-8');
+    return res.send(responseXml);
+  }
+
+  if (soapAction.includes('TriggerSoapFault') || body.TriggerSoapFaultRequest) {
+    return sendSoapFault(res, 'Server', 'Simulated Enterprise Fault', 'Database unreachable or invalid transaction authorization');
+  }
+
   // Fault if operation not recognized
-  return sendSoapFault(res, 'Client', 'Unknown SOAP Operation', 'Supported operations: GetUserDetails, ProcessTransaction');
+  return sendSoapFault(res, 'Client', 'Unknown SOAP Operation', 'Supported operations: GetUserDetails, ProcessTransaction, CheckInventory, TriggerSoapFault');
 });
 
 function sendSoapFault(res: Response, faultCode: string, faultString: string, detail: string) {

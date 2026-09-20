@@ -46,6 +46,46 @@ router.get('/postman', (req: Request, res: Response) => {
             },
           },
           {
+            name: 'Search & Paginate',
+            request: {
+              method: 'GET',
+              header: [],
+              url: { raw: `${host}/rest/search?q=gateway&page=1&limit=5&sort=price:desc`, host: [host], path: ['rest', 'search'], query: [{ key: 'q', value: 'gateway' }, { key: 'page', value: '1' }, { key: 'limit', value: '5' }, { key: 'sort', value: 'price:desc' }] },
+            },
+          },
+          {
+            name: 'Rate Limit Simulator (429 & Quota)',
+            request: {
+              method: 'GET',
+              header: [],
+              url: { raw: `${host}/rest/rate-limit`, host: [host], path: ['rest', 'rate-limit'] },
+            },
+          },
+          {
+            name: 'Cache Validation (ETag / 304)',
+            request: {
+              method: 'GET',
+              header: [{ key: 'If-None-Match', value: '"omnimock-abc123"' }],
+              url: { raw: `${host}/rest/cache`, host: [host], path: ['rest', 'cache'] },
+            },
+          },
+          {
+            name: 'Download CSV Report',
+            request: {
+              method: 'GET',
+              header: [],
+              url: { raw: `${host}/rest/download/csv`, host: [host], path: ['rest', 'download', 'csv'] },
+            },
+          },
+          {
+            name: 'Download Mock PDF',
+            request: {
+              method: 'GET',
+              header: [],
+              url: { raw: `${host}/rest/download/pdf`, host: [host], path: ['rest', 'download', 'pdf'] },
+            },
+          },
+          {
             name: 'Status Code 429 (Rate Limit)',
             request: {
               method: 'GET',
@@ -197,7 +237,22 @@ router.get('/postman', (req: Request, res: Response) => {
               body: {
                 mode: 'graphql',
                 graphql: {
-                  query: 'query GetAllData {\n  users(limit: 3) {\n    id\n    name\n    email\n    role\n  }\n  products(limit: 2) {\n    id\n    title\n    price\n  }\n}',
+                  query: 'query GetAllData {\n  users(limit: 3) {\n    id\n    name\n    email\n    role\n  }\n  products(limit: 2) {\n    id\n    title\n    price\n  }\n  serverHealth {\n    status\n    uptimeSeconds\n    protocolsActive\n  }\n}',
+                },
+              },
+              url: { raw: `${host}/graphql`, host: [host], path: ['graphql'] },
+            },
+          },
+          {
+            name: 'Mutation Create Order',
+            request: {
+              method: 'POST',
+              header: [{ key: 'Content-Type', value: 'application/json' }],
+              body: {
+                mode: 'graphql',
+                graphql: {
+                  query: 'mutation NewOrder($input: CreateOrderInput!) {\n  createOrder(input: $input) {\n    id\n    totalAmount\n    status\n    createdAt\n  }\n}',
+                  variables: JSON.stringify({ input: { userId: 'usr_101', items: [{ productId: 'prod_1', quantity: 2, unitPrice: 49.99 }] } }, null, 2),
                 },
               },
               url: { raw: `${host}/graphql`, host: [host], path: ['graphql'] },
@@ -221,6 +276,53 @@ router.get('/postman', (req: Request, res: Response) => {
                 raw: '<?xml version="1.0" encoding="UTF-8"?>\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="http://omnimock.local/soap/service">\n  <soap:Body>\n    <tns:GetUserDetailsRequest>\n      <userId>usr_postman_1</userId>\n    </tns:GetUserDetailsRequest>\n  </soap:Body>\n</soap:Envelope>',
               },
               url: { raw: `${host}/soap/service`, host: [host], path: ['soap', 'service'] },
+            },
+          },
+          {
+            name: 'SOAP CheckInventory',
+            request: {
+              method: 'POST',
+              header: [
+                { key: 'Content-Type', value: 'text/xml; charset=utf-8' },
+                { key: 'SOAPAction', value: 'CheckInventory' },
+              ],
+              body: {
+                mode: 'raw',
+                raw: '<?xml version="1.0" encoding="UTF-8"?>\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="http://omnimock.local/soap/service">\n  <soap:Body>\n    <tns:CheckInventoryRequest>\n      <sku>SKU-ROUTER-PRO</sku>\n      <warehouseId>WH-CENTRAL-01</warehouseId>\n    </tns:CheckInventoryRequest>\n  </soap:Body>\n</soap:Envelope>',
+              },
+              url: { raw: `${host}/soap/service`, host: [host], path: ['soap', 'service'] },
+            },
+          },
+        ],
+      },
+      {
+        name: 'JSON-RPC 2.0',
+        item: [
+          {
+            name: 'System Health RPC',
+            request: {
+              method: 'POST',
+              header: [{ key: 'Content-Type', value: 'application/json' }],
+              body: {
+                mode: 'raw',
+                raw: JSON.stringify({ jsonrpc: '2.0', method: 'system.health', id: 1 }, null, 2),
+              },
+              url: { raw: `${host}/rpc/json`, host: [host], path: ['rpc', 'json'] },
+            },
+          },
+          {
+            name: 'Calculate Fibonacci Batch RPC',
+            request: {
+              method: 'POST',
+              header: [{ key: 'Content-Type', value: 'application/json' }],
+              body: {
+                mode: 'raw',
+                raw: JSON.stringify([
+                  { jsonrpc: '2.0', method: 'math.fibonacci', params: { n: 10 }, id: 'fib1' },
+                  { jsonrpc: '2.0', method: 'calculate', params: { op: 'multiply', a: 12, b: 8 }, id: 'math1' },
+                ], null, 2),
+              },
+              url: { raw: `${host}/rpc/json`, host: [host], path: ['rpc', 'json'] },
             },
           },
         ],
@@ -255,16 +357,22 @@ router.get('/lux-api', (req: Request, res: Response) => {
       { id: 'f_soap', name: 'SOAP XML' },
       { id: 'f_grpc', name: 'gRPC Requests' },
       { id: 'f_ws', name: 'WebSocket Streams' },
+      { id: 'f_sse', name: 'Server-Sent Events' },
+      { id: 'f_jsonrpc', name: 'JSON-RPC 2.0' },
       { id: 'f_webhooks', name: 'Webhooks' },
     ],
     requests: [
       { id: 'req_1', folderId: 'f_rest', name: 'GET Echo', method: 'GET', url: '{{baseUrl}}/rest/get' },
-      { id: 'req_2', folderId: 'f_rest', name: 'POST Echo', method: 'POST', url: '{{baseUrl}}/rest/post', body: { json: { test: true } } },
-      { id: 'req_3', folderId: 'f_faker', name: 'Faker Users', method: 'GET', url: '{{baseUrl}}/faker/users?count=10' },
-      { id: 'req_4', folderId: 'f_auth', name: 'Protected JWT', method: 'GET', url: '{{baseUrl}}/auth/jwt/protected', auth: { type: 'bearer' } },
-      { id: 'req_5', folderId: 'f_graphql', name: 'GraphQL Query', method: 'POST', url: '{{baseUrl}}/graphql', body: { graphql: '{ users { id name } }' } },
-      { id: 'req_6', folderId: 'f_grpc', name: 'gRPC Echo', protocol: 'grpc', url: '{{grpcHost}}', service: 'omnimock.v1.TestService/UnaryEcho' },
-      { id: 'req_7', folderId: 'f_ws', name: 'WS Live Ticker', protocol: 'websocket', url: '{{wsUrl}}/ws/ticker' },
+      { id: 'req_2', folderId: 'f_rest', name: 'Search & Paginate', method: 'GET', url: '{{baseUrl}}/rest/search?q=gateway&page=1&limit=5' },
+      { id: 'req_3', folderId: 'f_rest', name: 'Rate Limit Simulator', method: 'GET', url: '{{baseUrl}}/rest/rate-limit' },
+      { id: 'req_4', folderId: 'f_faker', name: 'Faker Users', method: 'GET', url: '{{baseUrl}}/faker/users?count=10' },
+      { id: 'req_5', folderId: 'f_auth', name: 'Protected JWT', method: 'GET', url: '{{baseUrl}}/auth/jwt/protected', auth: { type: 'bearer' } },
+      { id: 'req_6', folderId: 'f_graphql', name: 'GraphQL Server Health', method: 'POST', url: '{{baseUrl}}/graphql', body: { graphql: '{ serverHealth { status uptimeSeconds protocolsActive } }' } },
+      { id: 'req_7', folderId: 'f_soap', name: 'SOAP Check Inventory', method: 'POST', url: '{{baseUrl}}/soap/service', body: { xml: '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="http://omnimock.local/soap/service"><soap:Body><tns:CheckInventoryRequest><sku>SKU-PRO</sku><warehouseId>WH-1</warehouseId></tns:CheckInventoryRequest></soap:Body></soap:Envelope>' } },
+      { id: 'req_8', folderId: 'f_grpc', name: 'gRPC List Products', protocol: 'grpc', url: '{{grpcHost}}', service: 'omnimock.v1.TestService/ListProducts' },
+      { id: 'req_9', folderId: 'f_ws', name: 'WS Crypto Market', protocol: 'websocket', url: '{{wsUrl}}/ws/crypto' },
+      { id: 'req_10', folderId: 'f_sse', name: 'SSE Stock Ticker', protocol: 'sse', url: '{{baseUrl}}/sse/stocks' },
+      { id: 'req_11', folderId: 'f_jsonrpc', name: 'JSON-RPC Health', method: 'POST', url: '{{baseUrl}}/rpc/json', body: { json: { jsonrpc: '2.0', method: 'system.health', id: 1 } } },
     ],
   };
 

@@ -46,6 +46,26 @@
           </xsd:sequence>
         </xsd:complexType>
       </xsd:element>
+
+      <xsd:element name="CheckInventoryRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="sku" type="xsd:string"/>
+            <xsd:element name="warehouseId" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="CheckInventoryResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="sku" type="xsd:string"/>
+            <xsd:element name="inStock" type="xsd:boolean"/>
+            <xsd:element name="quantity" type="xsd:int"/>
+            <xsd:element name="leadTimeDays" type="xsd:int"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
     </xsd:schema>
   </types>
 
@@ -61,6 +81,12 @@
   <message name="ProcessTransactionOutput">
     <part name="parameters" element="tns:ProcessTransactionResponse"/>
   </message>
+  <message name="CheckInventoryInput">
+    <part name="parameters" element="tns:CheckInventoryRequest"/>
+  </message>
+  <message name="CheckInventoryOutput">
+    <part name="parameters" element="tns:CheckInventoryResponse"/>
+  </message>
 
   <portType name="OmniMockPortType">
     <operation name="GetUserDetails">
@@ -70,6 +96,10 @@
     <operation name="ProcessTransaction">
       <input message="tns:ProcessTransactionInput"/>
       <output message="tns:ProcessTransactionOutput"/>
+    </operation>
+    <operation name="CheckInventory">
+      <input message="tns:CheckInventoryInput"/>
+      <output message="tns:CheckInventoryOutput"/>
     </operation>
   </portType>
 
@@ -82,6 +112,11 @@
     </operation>
     <operation name="ProcessTransaction">
       <soap:operation soapAction="ProcessTransaction"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+    <operation name="CheckInventory">
+      <soap:operation soapAction="CheckInventory"/>
       <input><soap:body use="literal"/></input>
       <output><soap:body use="literal"/></output>
     </operation>

@@ -73,6 +73,28 @@ const rpcMethods: Record<string, (params: any) => Promise<any> | any> = {
       timestamp: Math.floor(Date.now() / 1000),
     };
   },
+
+  // 6. System Health & Diagnostics
+  'system.health': () => ({
+    status: 'OPERATIONAL',
+    protocols: ['REST', 'GraphQL', 'gRPC', 'SOAP', 'WebSocket', 'Socket.IO', 'SSE', 'JSON-RPC'],
+    version: '1.0.0',
+    timestamp: new Date().toISOString(),
+  }),
+
+  // 7. System Uptime
+  'system.uptime': () => ({
+    uptimeSeconds: Math.floor(process.uptime()),
+    nodeVersion: process.version,
+    platform: process.platform,
+  }),
+
+  // 8. Fibonacci Calculation
+  'math.fibonacci': (params) => {
+    const n = Math.min(Math.max(parseInt(params?.n, 10) || 1, 1), 40);
+    const fib = (num: number): number => (num <= 1 ? num : fib(num - 1) + fib(num - 2));
+    return { n, result: fib(n) };
+  },
 };
 
 async function processSingleRpc(req: any): Promise<JsonRpcResponse | null> {

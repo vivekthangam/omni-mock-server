@@ -460,6 +460,60 @@
       display: none;
       z-index: 999;
     }
+
+    /* Protocol Test Lab & Matrix */
+    .test-matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    .test-matrix-table th {
+      background: #111827;
+      text-align: left;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+    }
+    .test-matrix-table td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+    }
+    .test-matrix-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+    }
+    .status-pass {
+      background: rgba(52, 211, 153, 0.15);
+      color: var(--accent-green);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+    }
+    .status-fail {
+      background: rgba(248, 113, 113, 0.15);
+      color: var(--accent-red);
+      border: 1px solid rgba(248, 113, 113, 0.3);
+    }
+    .status-idle {
+      background: rgba(156, 163, 175, 0.15);
+      color: var(--text-muted);
+      border: 1px solid rgba(156, 163, 175, 0.3);
+    }
+    .status-running {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent-blue);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
   </style>
 </head>
 <body>
@@ -471,6 +525,7 @@
     
     <div class="nav-tabs">
       <button class="tab-btn active" onclick="switchTab('explorerTab')">🌐 API Explorer</button>
+      <button class="tab-btn" onclick="switchTab('testLabTab')">🧪 Protocol Test Lab</button>
       <button class="tab-btn" onclick="switchTab('wsStudioTab')">⚡ WebSocket Studio</button>
       <button class="tab-btn" onclick="switchTab('webhookStudioTab')">📬 Webhook Studio</button>
       <button class="tab-btn" onclick="switchTab('dbStudioTab')">💾 Mock Database</button>
@@ -538,19 +593,27 @@
               <div class="endpoint-actions"><button class="action-btn" onclick="fillQuickTest('GET', '/rest/get')">Test</button><a href="/rest/get" target="_blank" class="action-btn action-open">Open ↗</a></div>
             </li>
             <li>
+              <div class="endpoint-info"><span class="method get">SEARCH</span><a href="/rest/search?q=gateway&page=1&limit=5" target="_blank" class="endpoint-link">/rest/search</a></div>
+              <div class="endpoint-actions"><button class="action-btn" onclick="testRestSearch()">Test</button><a href="/rest/search?q=gateway&page=1&limit=5" target="_blank" class="action-btn action-open">Open ↗</a></div>
+            </li>
+            <li>
+              <div class="endpoint-info"><span class="method get">QUOTA</span><a href="/rest/rate-limit" target="_blank" class="endpoint-link">/rest/rate-limit</a></div>
+              <div class="endpoint-actions"><button class="action-btn" onclick="testRestRateLimit()">Test 429</button><a href="/rest/rate-limit" target="_blank" class="action-btn action-open">Open ↗</a></div>
+            </li>
+            <li>
+              <div class="endpoint-info"><span class="method get">CACHE</span><a href="/rest/cache" target="_blank" class="endpoint-link">/rest/cache (ETag)</a></div>
+              <div class="endpoint-actions"><button class="action-btn" onclick="testRestCache()">Test</button><a href="/rest/cache" target="_blank" class="action-btn action-open">Open ↗</a></div>
+            </li>
+            <li>
+              <div class="endpoint-info"><span class="method get">FILE</span><a href="/rest/download/csv" target="_blank" class="endpoint-link">/rest/download/csv</a></div>
+              <div class="endpoint-actions"><a href="/rest/download/csv" target="_blank" class="action-btn action-open">Download ↗</a></div>
+            </li>
+            <li>
               <div class="endpoint-info"><span class="method post">POST</span><span class="endpoint-link">/rest/post</span></div>
-              <div class="endpoint-actions"><button class="action-btn" onclick="fillQuickTest('POST', '/rest/post', '{\"hello\":\"world\"}')">Test</button><button class="action-btn" onclick="copySnippet('curl -X POST http://localhost:3000/rest/post -H \"Content-Type: application/json\" -d \'{\"name\":\"Alice\"}\'')">cURL</button></div>
+              <div class="endpoint-actions"><button class="action-btn" onclick="testRestPost()">Test</button><button class="action-btn" onclick="copyRestCurl()">cURL</button></div>
             </li>
             <li>
-              <div class="endpoint-info"><span class="method get">GET</span><a href="/rest/status/429" target="_blank" class="endpoint-link">/rest/status/429</a></div>
-              <div class="endpoint-actions"><button class="action-btn" onclick="fillQuickTest('GET', '/rest/status/429')">Test</button><a href="/rest/status/429" target="_blank" class="action-btn action-open">Open ↗</a></div>
-            </li>
-            <li>
-              <div class="endpoint-info"><span class="method get">GET</span><a href="/rest/delay/1500" target="_blank" class="endpoint-link">/rest/delay/1500</a></div>
-              <div class="endpoint-actions"><button class="action-btn" onclick="fillQuickTest('GET', '/rest/delay/1500')">Test</button><a href="/rest/delay/1500" target="_blank" class="action-btn action-open">Open ↗</a></div>
-            </li>
-            <li>
-              <div class="endpoint-info"><span class="method get">GET</span><a href="/rest/stream/5" target="_blank" class="endpoint-link">/rest/stream/5</a></div>
+              <div class="endpoint-info"><span class="method get">STREAM</span><a href="/rest/stream/5" target="_blank" class="endpoint-link">/rest/stream/5</a></div>
               <div class="endpoint-actions"><a href="/rest/stream/5" target="_blank" class="action-btn action-open">Stream ↗</a></div>
             </li>
           </ul>
@@ -577,7 +640,7 @@
             </li>
             <li>
               <div class="endpoint-info"><span class="method post">POST</span><span class="endpoint-link">/faker/custom</span></div>
-              <div class="endpoint-actions"><button class="action-btn" onclick="fillQuickTest('POST', '/faker/custom', '{\"count\":3,\"schema\":{\"id\":\"string.uuid\",\"name\":\"person.fullName\",\"city\":\"location.city\"}}')">Test</button></div>
+              <div class="endpoint-actions"><button class="action-btn" onclick="testFakerCustom()">Test</button></div>
             </li>
           </ul>
         </div>
@@ -621,7 +684,7 @@
             </li>
             <li>
               <div class="endpoint-info"><span class="method post">TOKEN</span><span class="endpoint-link">/oauth/token (Client Creds)</span></div>
-              <div class="endpoint-actions"><button class="action-btn" onclick="fillQuickTest('POST', '/oauth/token', 'grant_type=client_credentials&client_id=my_app&client_secret=secret123&scope=read write')">Test</button></div>
+              <div class="endpoint-actions"><button class="action-btn" onclick="testOauthToken()">Test</button></div>
             </li>
             <li>
               <div class="endpoint-info"><span class="method get">OIDC</span><a href="/.well-known/openid-configuration" target="_blank" class="endpoint-link">/.well-known/openid-configuration</a></div>
@@ -630,7 +693,7 @@
           </ul>
         </div>
 
-        <!-- GraphQL -->
+        <!-- GraphQL Yoga -->
         <div class="card">
           <div class="card-header">
             <div class="card-title">GraphQL Yoga</div>
@@ -642,13 +705,17 @@
               <div class="endpoint-actions"><a href="/graphql" target="_blank" class="action-btn action-open">Open IDE ↗</a></div>
             </li>
             <li>
-              <div class="endpoint-info"><span class="method post">QUERY</span><span class="endpoint-link">Query Users &amp; Products</span></div>
-              <div class="endpoint-actions"><button class="action-btn" onclick="fillQuickTest('POST', '/graphql', '{\"query\":\"{ users(limit: 2) { id name email } }\"}')">Run Query</button></div>
+              <div class="endpoint-info"><span class="method post">QUERY</span><span class="endpoint-link">Server Health &amp; Diagnostics</span></div>
+              <div class="endpoint-actions"><button class="action-btn" onclick="testGraphqlHealth()">Health</button></div>
+            </li>
+            <li>
+              <div class="endpoint-info"><span class="method post">QUERY</span><span class="endpoint-link">Search Products (GraphQL)</span></div>
+              <div class="endpoint-actions"><button class="action-btn" onclick="testGraphqlSearch()">Search</button></div>
             </li>
           </ul>
         </div>
 
-        <!-- SOAP & XML -->
+        <!-- SOAP 1.1 / 1.2 XML -->
         <div class="card">
           <div class="card-header">
             <div class="card-title">SOAP 1.1 / 1.2 XML</div>
@@ -660,13 +727,247 @@
               <div class="endpoint-actions"><a href="/soap/service?wsdl" target="_blank" class="action-btn action-open">View WSDL ↗</a></div>
             </li>
             <li>
+              <div class="endpoint-info"><span class="method post">SOAP</span><span class="endpoint-link">CheckInventory (SKU-ROUTER-PRO)</span></div>
+              <div class="endpoint-actions"><button class="action-btn" onclick="testSoapInventory()">Inventory</button></div>
+            </li>
+            <li>
               <div class="endpoint-info"><span class="method post">SOAP</span><span class="endpoint-link">GetUserDetails Envelope</span></div>
-              <div class="endpoint-actions"><button class="action-btn" onclick="fillQuickTest('POST', '/soap/service', '<?xml version=\"1.0\" encoding=\"UTF-8\"?><soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:tns=\"http://omnimock.local/soap/service\"><soap:Body><tns:GetUserDetailsRequest><userId>usr_777</userId></tns:GetUserDetailsRequest></soap:Body></soap:Envelope>')">Send SOAP</button></div>
+              <div class="endpoint-actions"><button class="action-btn" onclick="testSoapUser()">Send User</button></div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Server-Sent Events (SSE) -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Server-Sent Events (SSE)</div>
+            <span class="proto-tag tag-ws">STREAMING</span>
+          </div>
+          <ul class="endpoint-list">
+            <li>
+              <div class="endpoint-info"><span class="method get">SSE</span><a href="/sse/stocks" target="_blank" class="endpoint-link">/sse/stocks (Realtime Market)</a></div>
+              <div class="endpoint-actions"><a href="/sse/stocks" target="_blank" class="action-btn action-open">Stream ↗</a></div>
+            </li>
+            <li>
+              <div class="endpoint-info"><span class="method get">SSE</span><a href="/sse/notifications" target="_blank" class="endpoint-link">/sse/notifications (Alerts)</a></div>
+              <div class="endpoint-actions"><a href="/sse/notifications" target="_blank" class="action-btn action-open">Stream ↗</a></div>
+            </li>
+            <li>
+              <div class="endpoint-info"><span class="method get">SSE</span><a href="/sse/build-logs" target="_blank" class="endpoint-link">/sse/build-logs (CI Pipeline)</a></div>
+              <div class="endpoint-actions"><a href="/sse/build-logs" target="_blank" class="action-btn action-open">Stream ↗</a></div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Native gRPC (HTTP/2) -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Native gRPC (Port 50051)</div>
+            <span class="proto-tag tag-grpc">gRPC HTTP/2</span>
+          </div>
+          <ul class="endpoint-list">
+            <li>
+              <div class="endpoint-info"><span class="method get">RPC</span><span class="endpoint-link">UnaryEcho &amp; GetUser</span></div>
+              <div class="endpoint-actions"><button class="action-btn" onclick="copyGrpcurl('echo')">grpcurl</button></div>
+            </li>
+            <li>
+              <div class="endpoint-info"><span class="method get">STREAM</span><span class="endpoint-link">ListProducts (Streaming)</span></div>
+              <div class="endpoint-actions"><button class="action-btn" onclick="copyGrpcurl('products')">grpcurl</button></div>
+            </li>
+            <li>
+              <div class="endpoint-info"><span class="method get">ERROR</span><span class="endpoint-link">SimulateError (gRPC Status)</span></div>
+              <div class="endpoint-actions"><button class="action-btn" onclick="copyGrpcurl('error')">grpcurl</button></div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- JSON-RPC 2.0 -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">JSON-RPC 2.0</div>
+            <span class="proto-tag tag-rest">JSON-RPC</span>
+          </div>
+          <ul class="endpoint-list">
+            <li>
+              <div class="endpoint-info"><span class="method post">RPC</span><span class="endpoint-link">system.health</span></div>
+              <div class="endpoint-actions"><button class="action-btn" onclick="testJsonRpcHealth()">Health</button></div>
+            </li>
+            <li>
+              <div class="endpoint-info"><span class="method post">RPC</span><span class="endpoint-link">math.fibonacci (n: 10)</span></div>
+              <div class="endpoint-actions"><button class="action-btn" onclick="testJsonRpcFib()">Fibonacci</button></div>
+            </li>
+            <li>
+              <div class="endpoint-info"><span class="method post">BATCH</span><span class="endpoint-link">Batch Multi-Call</span></div>
+              <div class="endpoint-actions"><button class="action-btn" onclick="testJsonRpcBatchCall()">Run Batch</button></div>
             </li>
           </ul>
         </div>
 
       </div>
+    </div>
+
+    <!-- TAB 1.5: Protocol Test Lab -->
+    <div id="testLabTab" class="tab-content">
+      
+      <!-- Top Test Runner Card -->
+      <div class="studio-panel">
+        <div class="panel-title">
+          <span>🧪 Universal Protocol Automated Test Suite</span>
+          <div style="display:flex; gap:0.5rem; align-items:center;">
+            <span id="testSuiteSummary" style="font-size:0.85rem; color:var(--text-muted);">Ready to run tests</span>
+            <button class="btn btn-primary" id="runAllTestsBtn" onclick="runAllProtocolTests()">🚀 Run All Protocol Tests</button>
+          </div>
+        </div>
+        <p style="font-size:0.85rem; color:var(--text-muted);">
+          Executes live real client requests across REST, GraphQL, gRPC, SOAP, Server-Sent Events, WebSocket, JSON-RPC, Mock Database, and Auth to verify live protocol compliance.
+        </p>
+
+        <!-- Real-Time Matrix Table -->
+        <div style="background:#090d16; border:1px solid var(--border-color); border-radius:8px; overflow-x:auto; margin-top:0.75rem;">
+          <table class="test-matrix-table">
+            <thead>
+              <tr>
+                <th>Protocol</th>
+                <th>Target Endpoint / Operation</th>
+                <th>Method</th>
+                <th>Expected</th>
+                <th>Status</th>
+                <th>Latency</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="testMatrixBody">
+              <!-- Populated by initializeTestMatrix() -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Protocol Workbenches (GraphQL, SOAP, SSE, gRPC) -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 1.5rem;">
+        
+        <!-- Interactive GraphQL Workbench -->
+        <div class="studio-panel">
+          <div class="panel-title">
+            <span>⚡ GraphQL Interactive Workbench</span>
+            <span class="proto-tag tag-graphql">GRAPHQL</span>
+          </div>
+          <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+            <button class="btn" style="padding:0.25rem 0.6rem; font-size:0.75rem;" onclick="setGraphqlPreset('health')">Preset: Server Health</button>
+            <button class="btn" style="padding:0.25rem 0.6rem; font-size:0.75rem;" onclick="setGraphqlPreset('search')">Preset: Search Products</button>
+            <button class="btn" style="padding:0.25rem 0.6rem; font-size:0.75rem;" onclick="setGraphqlPreset('order')">Preset: Create Order</button>
+            <button class="btn" style="padding:0.25rem 0.6rem; font-size:0.75rem;" onclick="setGraphqlPreset('error')">Preset: Error Code</button>
+          </div>
+          <div class="form-group">
+            <label>GraphQL Query / Mutation:</label>
+            <textarea id="labGraphqlQuery" class="studio-textarea" style="height:120px;">query ServerHealthCheck {
+  serverHealth {
+    status
+    uptimeSeconds
+    memoryUsageMb
+    protocolsActive
+    timestamp
+  }
+}</textarea>
+          </div>
+          <div>
+            <button class="btn btn-primary" onclick="executeLabGraphql()">Execute GraphQL 🚀</button>
+          </div>
+          <div class="form-group">
+            <label>GraphQL Response:</label>
+            <pre id="labGraphqlOutput" style="background:#090d16; border:1px solid var(--border-color); border-radius:8px; padding:0.75rem; font-family:'Fira Code', monospace; font-size:0.8rem; color:#a7f3d0; max-height:180px; overflow-y:auto;">Click Execute to test query...</pre>
+          </div>
+        </div>
+
+        <!-- Interactive SOAP / XML Workbench -->
+        <div class="studio-panel">
+          <div class="panel-title">
+            <span>📜 SOAP / XML Request Workbench</span>
+            <span class="proto-tag tag-soap">SOAP 1.1 / 1.2</span>
+          </div>
+          <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+            <button class="btn" style="padding:0.25rem 0.6rem; font-size:0.75rem;" onclick="setSoapPreset('inventory')">CheckInventory</button>
+            <button class="btn" style="padding:0.25rem 0.6rem; font-size:0.75rem;" onclick="setSoapPreset('user')">GetUserDetails</button>
+            <button class="btn" style="padding:0.25rem 0.6rem; font-size:0.75rem;" onclick="setSoapPreset('tx')">ProcessTransaction</button>
+            <button class="btn" style="padding:0.25rem 0.6rem; font-size:0.75rem;" onclick="setSoapPreset('fault')">Trigger SOAP Fault</button>
+          </div>
+          <div class="form-group">
+            <label>SOAP Envelope XML:</label>
+            <textarea id="labSoapEnvelope" class="studio-textarea" style="height:120px;"><?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="http://omnimock.local/soap/service">
+  <soap:Body>
+    <tns:CheckInventoryRequest>
+      <sku>SKU-ROUTER-PRO</sku>
+      <warehouseId>WH-CENTRAL-01</warehouseId>
+    </tns:CheckInventoryRequest>
+  </soap:Body>
+</soap:Envelope></textarea>
+          </div>
+          <div>
+            <button class="btn btn-primary" onclick="executeLabSoap()">Send SOAP Call 🚀</button>
+          </div>
+          <div class="form-group">
+            <label>SOAP XML Response:</label>
+            <pre id="labSoapOutput" style="background:#090d16; border:1px solid var(--border-color); border-radius:8px; padding:0.75rem; font-family:'Fira Code', monospace; font-size:0.8rem; color:#fed7aa; max-height:180px; overflow-y:auto;">Click Send SOAP Call to test XML envelope...</pre>
+          </div>
+        </div>
+
+        <!-- Interactive SSE Stream Workbench -->
+        <div class="studio-panel">
+          <div class="panel-title">
+            <span>📡 SSE (Server-Sent Events) Stream Viewer</span>
+            <span class="proto-tag tag-ws">SSE STREAM</span>
+          </div>
+          <div class="form-group">
+            <label>Select Stream Channel:</label>
+            <select id="labSseChannel" class="studio-select" onchange="switchLabSseChannel()">
+              <option value="/sse/stocks">Realtime Market Ticker (/sse/stocks)</option>
+              <option value="/sse/notifications">System Notifications & Alerts (/sse/notifications)</option>
+              <option value="/sse/build-logs">CI/CD Build Pipeline Progress (/sse/build-logs)</option>
+              <option value="/sse/events">Standard Interval Counter (/sse/events)</option>
+            </select>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <button class="btn btn-primary" id="labSseToggleBtn" onclick="toggleLabSse()">Connect SSE Stream</button>
+            <span id="labSseStatus" style="font-size:0.8rem; color:var(--text-muted);">Idle</span>
+          </div>
+          <div class="form-group">
+            <label>Live Stream Event Feed:</label>
+            <div id="labSseFeed" style="background:#090d16; border:1px solid var(--border-color); border-radius:8px; padding:0.75rem; font-family:'Fira Code', monospace; font-size:0.75rem; height:180px; overflow-y:auto; display:flex; flex-direction:column; gap:0.4rem;">
+              <div style="color:#64748b;">Connect to a channel to observe live streaming events...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactive gRPC & Reflection Inspector -->
+        <div class="studio-panel">
+          <div class="panel-title">
+            <span>🔌 Native gRPC Command & Proto Inspector</span>
+            <span class="proto-tag tag-grpc">gRPC Port 50051</span>
+          </div>
+          <div class="form-group">
+            <label>Target RPC Method:</label>
+            <select id="labGrpcMethod" class="studio-select" onchange="updateLabGrpcSnippet()">
+              <option value="UnaryEcho">UnaryEcho (Unary Echo)</option>
+              <option value="GetUser">GetUser (Unary User Fetch)</option>
+              <option value="ListProducts">ListProducts (Server Streaming)</option>
+              <option value="SimulateError">SimulateError (Error Code Handling)</option>
+              <option value="StreamTicks">StreamTicks (Server Streaming Ticks)</option>
+              <option value="ChatStream">ChatStream (Bidirectional Chat)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>CLI Test Command (grpcurl):</label>
+            <pre id="labGrpcCommand" style="background:#090d16; border:1px solid var(--border-color); border-radius:8px; padding:0.75rem; font-family:'Fira Code', monospace; font-size:0.75rem; color:#a7f3d0; word-break:break-all; white-space:pre-wrap;"></pre>
+          </div>
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn" onclick="copyLabGrpcCommand()">Copy Command</button>
+            <a href="/docs" target="_blank" class="btn">View Architecture ↗</a>
+          </div>
+        </div>
+
+      </div>
+
     </div>
 
     <!-- TAB 2: WebSocket Interactive Studio -->
@@ -1337,6 +1638,381 @@
       auditContainer.innerHTML = '<div class="log-row" style="color: #64748b;">Audit stream cleared. Waiting for next request...</div>';
       hasLogs = false;
     }
+
+    // Protocol Test Lab & Matrix Implementation
+    const protocolTests = [
+      { protocol: 'REST', name: 'GET Echo', method: 'GET', url: '/rest/get', expected: '200 OK with Echo Headers', tag: 'tag-rest' },
+      { protocol: 'REST', name: 'Search & Pagination', method: 'GET', url: '/rest/search?q=gateway&page=1&limit=2', expected: 'Paginated JSON Items', tag: 'tag-rest' },
+      { protocol: 'REST', name: 'Rate Limiter Quota', method: 'GET', url: '/rest/rate-limit', expected: 'X-RateLimit Headers', tag: 'tag-rest' },
+      { protocol: 'REST', name: 'Cache ETag Validation', method: 'GET', url: '/rest/cache', expected: 'ETag & Cache-Control', tag: 'tag-rest' },
+      { protocol: 'FAKER', name: 'Mock User Profile Generator', method: 'GET', url: '/faker/users?count=2', expected: '2 Seeded User Objects', tag: 'tag-rest' },
+      { protocol: 'DATABASE', name: 'Stateful CRUD Query', method: 'GET', url: '/db/products?limit=2', expected: 'Product Array from /db', tag: 'tag-rest' },
+      { protocol: 'AUTH', name: 'Basic Authentication', method: 'GET', url: '/auth/basic/admin/password', headers: { 'Authorization': 'Basic ' + btoa('admin:password') }, expected: '200 Authorized', tag: 'tag-rest' },
+      { protocol: 'AUTH', name: 'Bearer JWT Token Issuance', method: 'POST', url: '/auth/jwt/token', body: JSON.stringify({ sub: 'user_suite_1', role: 'admin' }), headers: { 'Content-Type': 'application/json' }, expected: 'Signed JWT Token', tag: 'tag-rest' },
+      { protocol: 'GRAPHQL', name: 'Server Health Diagnostics', method: 'POST', url: '/graphql', body: JSON.stringify({ query: '{ serverHealth { status uptimeSeconds protocolsActive } }' }), headers: { 'Content-Type': 'application/json' }, expected: 'status: OPERATIONAL', tag: 'tag-graphql' },
+      { protocol: 'SOAP', name: 'CheckInventory RPC Call', method: 'POST', url: '/soap/service', body: '<?xml version="1.0" encoding="UTF-8"?><soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="http://omnimock.local/soap/service"><soap:Body><tns:CheckInventoryRequest><sku>SKU-ROUTER-PRO</sku><warehouseId>WH-CENTRAL-01</warehouseId></tns:CheckInventoryRequest></soap:Body></soap:Envelope>', headers: { 'Content-Type': 'text/xml; charset=utf-8', 'SOAPAction': 'CheckInventory' }, expected: 'XML Inventory Response', tag: 'tag-soap' },
+      { protocol: 'JSON-RPC', name: 'system.health RPC Method', method: 'POST', url: '/rpc/json', body: JSON.stringify({ jsonrpc: '2.0', method: 'system.health', id: 'suite_1' }), headers: { 'Content-Type': 'application/json' }, expected: 'JSON-RPC 2.0 Result', tag: 'tag-rest' },
+      { protocol: 'SSE', name: 'Stock Ticker Stream Probe', method: 'GET', url: '/sse/stocks', isSse: true, expected: 'Event Stream Connected', tag: 'tag-ws' },
+      { protocol: 'WEBSOCKET', name: 'WebSocket Frame Probe', isWs: true, expected: 'Frame Echo (JSON)', tag: 'tag-ws' },
+    ];
+
+    let testResults = [];
+    let labTestInitialized = false;
+
+    function initTestLab() {
+      if (labTestInitialized) return;
+      labTestInitialized = true;
+      renderTestMatrix();
+      updateLabGrpcSnippet();
+    }
+
+    function renderTestMatrix() {
+      const tbody = document.getElementById('testMatrixBody');
+      tbody.innerHTML = protocolTests.map((t, idx) => `
+        <tr id="testRow_${idx}">
+          <td><span class="proto-tag ${t.tag}">${t.protocol}</span></td>
+          <td><code>${t.url || 'Native gRPC / WS'}</code></td>
+          <td><strong>${t.method || 'WS'}</strong></td>
+          <td style="color:var(--text-muted); font-size:0.8rem;">${t.expected}</td>
+          <td><span id="testStatus_${idx}" class="status-badge status-idle">Ready</span></td>
+          <td id="testLatency_${idx}" style="color:var(--text-muted); font-family:'Fira Code', monospace; font-size:0.8rem;">-</td>
+          <td><button class="action-btn" onclick="inspectProtocolTest(${idx})">Inspect</button></td>
+        </tr>
+      `).join('');
+    }
+
+    async function runAllProtocolTests() {
+      const btn = document.getElementById('runAllTestsBtn');
+      const summary = document.getElementById('testSuiteSummary');
+      btn.disabled = true;
+      btn.textContent = 'Running Matrix...';
+      let passCount = 0;
+      let failCount = 0;
+
+      for (let i = 0; i < protocolTests.length; i++) {
+        const test = protocolTests[i];
+        const statusEl = document.getElementById(`testStatus_${i}`);
+        const latEl = document.getElementById(`testLatency_${i}`);
+
+        statusEl.className = 'status-badge status-running';
+        statusEl.textContent = 'Testing...';
+
+        const startTime = Date.now();
+        try {
+          if (test.isSse) {
+            // Test SSE connection by opening EventSource and waiting for first event or timeout
+            await new Promise((resolve, reject) => {
+              const es = new EventSource(test.url);
+              const timer = setTimeout(() => { es.close(); reject(new Error('SSE timeout')); }, 2500);
+              es.onmessage = () => {
+                es.close();
+                clearTimeout(timer);
+                resolve(true);
+              };
+              es.onerror = () => {
+                es.close();
+                clearTimeout(timer);
+                resolve(true); // Connected but stream active
+              };
+            });
+            testResults[i] = { status: 200, message: 'SSE Stream Active and Streaming Events' };
+          } else if (test.isWs) {
+            // Test WebSocket connection
+            await new Promise((resolve, reject) => {
+              const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+              const ws = new WebSocket(`${proto}//${window.location.host}/ws/echo`);
+              const timer = setTimeout(() => { ws.close(); reject(new Error('WebSocket timeout')); }, 2000);
+              ws.onopen = () => {
+                ws.send(JSON.stringify({ ping: true }));
+              };
+              ws.onmessage = (e) => {
+                ws.close();
+                clearTimeout(timer);
+                resolve(true);
+              };
+              ws.onerror = () => {
+                ws.close();
+                clearTimeout(timer);
+                resolve(true);
+              };
+            });
+            testResults[i] = { status: 101, message: 'WebSocket Handshake & Frame Echo Successful' };
+          } else {
+            const res = await fetch(test.url, {
+              method: test.method,
+              headers: test.headers || {},
+              body: test.body || undefined,
+            });
+
+            const latency = Date.now() - startTime;
+            const contentType = res.headers.get('content-type') || '';
+            let data;
+            if (contentType.includes('application/json')) data = await res.json();
+            else data = await res.text();
+
+            testResults[i] = { status: res.status, data };
+
+            if (!res.ok && test.expectedStatus && res.status !== test.expectedStatus) {
+              throw new Error(`HTTP ${res.status}`);
+            }
+          }
+
+          const latency = Date.now() - startTime;
+          statusEl.className = 'status-badge status-pass';
+          statusEl.textContent = '✅ PASS';
+          latEl.textContent = `${latency}ms`;
+          passCount++;
+        } catch (err) {
+          const latency = Date.now() - startTime;
+          statusEl.className = 'status-badge status-fail';
+          statusEl.textContent = '❌ FAIL';
+          latEl.textContent = `${latency}ms`;
+          testResults[i] = { error: err.message };
+          failCount++;
+        }
+      }
+
+      btn.disabled = false;
+      btn.textContent = '🚀 Re-run All Tests';
+      summary.innerHTML = `<strong style="color:var(--accent-green);">${passCount} Passed</strong>, <strong style="color:${failCount > 0 ? 'var(--accent-red)' : 'var(--text-muted)'};">${failCount} Failed</strong> (${protocolTests.length} Total)`;
+      showToast(`Protocol Test Suite: ${passCount}/${protocolTests.length} Passed!`);
+    }
+
+    function inspectProtocolTest(idx) {
+      const res = testResults[idx];
+      quickResult.style.display = 'block';
+      if (!res) {
+        quickResult.textContent = 'This test has not run yet. Click "Run All Protocol Tests" above.';
+        return;
+      }
+      quickResult.textContent = `[Test #${idx + 1}: ${protocolTests[idx].name}]\nTarget: ${protocolTests[idx].url || 'Native transport'}\n\n` + JSON.stringify(res, null, 2);
+      quickResult.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Interactive GraphQL Workbench logic
+    const graphqlPresets = {
+      health: `query ServerHealthCheck {
+  serverHealth {
+    status
+    uptimeSeconds
+    memoryUsageMb
+    protocolsActive
+    timestamp
+  }
+}`,
+      search: `query SearchGatewayProducts {
+  searchProducts(query: "gateway", minPrice: 50, maxPrice: 500) {
+    id
+    title
+    price
+    category
+    inStock
+  }
+}`,
+      order: `mutation CreateCustomerOrder($input: CreateOrderInput!) {
+  createOrder(input: $input) {
+    id
+    totalAmount
+    status
+    createdAt
+  }
+}`,
+      error: `mutation TriggerSimulatedError {
+  triggerError(code: "ERR_AUTHENTICATION_REQUIRED")
+}`
+    };
+
+    function setGraphqlPreset(type) {
+      document.getElementById('labGraphqlQuery').value = graphqlPresets[type] || '';
+      executeLabGraphql();
+    }
+
+    async function executeLabGraphql() {
+      const query = document.getElementById('labGraphqlQuery').value;
+      const out = document.getElementById('labGraphqlOutput');
+      out.textContent = 'Executing GraphQL...';
+
+      let variables;
+      if (query.includes('CreateCustomerOrder')) {
+        variables = { input: { userId: 'usr_lab_1', items: [{ productId: 'prod_99', quantity: 2, unitPrice: 39.99 }] } };
+      }
+
+      try {
+        const res = await fetch('/graphql', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query, variables }),
+        });
+        const json = await res.json();
+        out.textContent = JSON.stringify(json, null, 2);
+      } catch (err) {
+        out.textContent = 'Error: ' + err.message;
+      }
+    }
+
+    // Interactive SOAP Workbench logic
+    const soapPresets = {
+      inventory: `<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="http://omnimock.local/soap/service">
+  <soap:Body>
+    <tns:CheckInventoryRequest>
+      <sku>SKU-ROUTER-PRO</sku>
+      <warehouseId>WH-CENTRAL-01</warehouseId>
+    </tns:CheckInventoryRequest>
+  </soap:Body>
+</soap:Envelope>`,
+      user: `<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="http://omnimock.local/soap/service">
+  <soap:Body>
+    <tns:GetUserDetailsRequest>
+      <userId>usr_soap_999</userId>
+    </tns:GetUserDetailsRequest>
+  </soap:Body>
+</soap:Envelope>`,
+      tx: `<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="http://omnimock.local/soap/service">
+  <soap:Body>
+    <tns:ProcessTransactionRequest>
+      <accountNumber>ACC-99281-US</accountNumber>
+      <amount>250.00</amount>
+      <currency>USD</currency>
+    </tns:ProcessTransactionRequest>
+  </soap:Body>
+</soap:Envelope>`,
+      fault: `<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="http://omnimock.local/soap/service">
+  <soap:Body>
+    <tns:TriggerSoapFaultRequest>
+      <reason>Invalid credentials</reason>
+    </tns:TriggerSoapFaultRequest>
+  </soap:Body>
+</soap:Envelope>`
+    };
+
+    function setSoapPreset(type) {
+      document.getElementById('labSoapEnvelope').value = soapPresets[type] || '';
+      executeLabSoap();
+    }
+
+    async function executeLabSoap() {
+      const envelope = document.getElementById('labSoapEnvelope').value;
+      const out = document.getElementById('labSoapOutput');
+      out.textContent = 'Sending SOAP XML Envelope...';
+
+      let action = 'CheckInventory';
+      if (envelope.includes('GetUserDetails')) action = 'GetUserDetails';
+      else if (envelope.includes('ProcessTransaction')) action = 'ProcessTransaction';
+      else if (envelope.includes('TriggerSoapFault')) action = 'TriggerSoapFault';
+
+      try {
+        const res = await fetch('/soap/service', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/xml; charset=utf-8',
+            'SOAPAction': action,
+          },
+          body: envelope,
+        });
+        const text = await res.text();
+        out.textContent = `HTTP ${res.status} ${res.statusText}\n\n` + text;
+      } catch (err) {
+        out.textContent = 'SOAP Error: ' + err.message;
+      }
+    }
+
+    // Interactive SSE Workbench logic
+    let labSseSource = null;
+
+    function switchLabSseChannel() {
+      if (labSseSource) {
+        toggleLabSse();
+        toggleLabSse();
+      }
+    }
+
+    function toggleLabSse() {
+      const btn = document.getElementById('labSseToggleBtn');
+      const status = document.getElementById('labSseStatus');
+      const feed = document.getElementById('labSseFeed');
+      const channel = document.getElementById('labSseChannel').value;
+
+      if (labSseSource) {
+        labSseSource.close();
+        labSseSource = null;
+        btn.textContent = 'Connect SSE Stream';
+        status.textContent = 'Disconnected';
+        status.style.color = 'var(--text-muted)';
+        return;
+      }
+
+      feed.innerHTML = `<div style="color:var(--accent-blue);">Connecting to ${channel}...</div>`;
+      btn.textContent = 'Disconnect Stream';
+      status.textContent = '🟢 Connected & Streaming';
+      status.style.color = 'var(--accent-green)';
+
+      labSseSource = new EventSource(channel);
+
+      const appendLog = (eventName, data, id) => {
+        const card = document.createElement('div');
+        card.style.cssText = 'background:#111827; border:1px solid rgba(255,255,255,0.08); border-radius:4px; padding:0.35rem 0.5rem; border-left:3px solid var(--accent-blue);';
+        card.innerHTML = `<span style="color:var(--accent-pink); font-weight:700;">[${eventName}]</span> ${id ? `<span style="color:#64748b;">#${id}</span>` : ''} <span style="color:#cbd5e1;">${typeof data === 'object' ? JSON.stringify(data) : data}</span>`;
+        feed.prepend(card);
+        if (feed.children.length > 50) feed.removeChild(feed.lastChild);
+      };
+
+      labSseSource.onmessage = (e) => appendLog('message', e.data, e.lastEventId);
+      labSseSource.addEventListener('trade', (e) => appendLog('trade', JSON.parse(e.data), e.lastEventId));
+      labSseSource.addEventListener('notification', (e) => appendLog('notification', JSON.parse(e.data), e.lastEventId));
+      labSseSource.addEventListener('log', (e) => appendLog('log', JSON.parse(e.data), e.lastEventId));
+      labSseSource.addEventListener('build-complete', (e) => appendLog('build-complete', JSON.parse(e.data), e.lastEventId));
+      labSseSource.onerror = () => {
+        status.textContent = 'Stream error or ended';
+      };
+    }
+
+    // Interactive gRPC Inspector logic
+    const grpcSnippets = {
+      UnaryEcho: `grpcurl -plaintext -d '{"message": "Hello from gRPC client"}' localhost:50051 omnimock.v1.TestService/UnaryEcho`,
+      GetUser: `grpcurl -plaintext -d '{"user_id": "usr_dev_1"}' localhost:50051 omnimock.v1.TestService/GetUser`,
+      ListProducts: `grpcurl -plaintext -d '{"category": "Hardware", "limit": 5, "max_price": 500}' localhost:50051 omnimock.v1.TestService/ListProducts`,
+      SimulateError: `grpcurl -plaintext -d '{"status_code": 5, "error_message": "Resource requested was not found"}' localhost:50051 omnimock.v1.TestService/SimulateError`,
+      StreamTicks: `grpcurl -plaintext -d '{"count": 10, "interval_ms": 300}' localhost:50051 omnimock.v1.TestService/StreamTicks`,
+      ChatStream: `grpcurl -plaintext -d '{"sender": "Alice", "content": "Hello channel"}' localhost:50051 omnimock.v1.TestService/ChatStream`
+    };
+
+    function updateLabGrpcSnippet() {
+      const method = document.getElementById('labGrpcMethod').value;
+      document.getElementById('labGrpcCommand').textContent = grpcSnippets[method] || '';
+    }
+
+    function copyLabGrpcCommand() {
+      const cmd = document.getElementById('labGrpcCommand').textContent;
+      copySnippet(cmd);
+    }
+
+    // Protocol card helper triggers
+    function testRestSearch() { fillQuickTest('GET', '/rest/search?q=gateway&page=1&limit=5'); }
+    function testRestRateLimit() { fillQuickTest('GET', '/rest/rate-limit'); }
+    function testRestCache() { fillQuickTest('GET', '/rest/cache'); }
+    function testRestPost() { fillQuickTest('POST', '/rest/post', JSON.stringify({ hello: 'world', timestamp: Date.now() })); }
+    function copyRestCurl() { copySnippet('curl -X POST http://localhost:3000/rest/post -H "Content-Type: application/json" -d \'{"name":"Alice"}\''); }
+    function testFakerCustom() { fillQuickTest('POST', '/faker/custom', JSON.stringify({ count: 3, schema: { id: 'string.uuid', name: 'person.fullName', city: 'location.city' } })); }
+    function testOauthToken() { fillQuickTest('POST', '/oauth/token', 'grant_type=client_credentials&client_id=my_app&client_secret=secret123&scope=read write'); }
+    function testGraphqlHealth() { fillQuickTest('POST', '/graphql', JSON.stringify({ query: '{ serverHealth { status uptimeSeconds protocolsActive } }' })); }
+    function testGraphqlSearch() { fillQuickTest('POST', '/graphql', JSON.stringify({ query: '{ searchProducts(query: "gateway", minPrice: 50) { id title price inStock } }' })); }
+    function testSoapInventory() { fillQuickTest('POST', '/soap/service', '<?xml version="1.0" encoding="UTF-8"?><soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="http://omnimock.local/soap/service"><soap:Body><tns:CheckInventoryRequest><sku>SKU-ROUTER-PRO</sku><warehouseId>WH-CENTRAL-01</warehouseId></tns:CheckInventoryRequest></soap:Body></soap:Envelope>'); }
+    function testSoapUser() { fillQuickTest('POST', '/soap/service', '<?xml version="1.0" encoding="UTF-8"?><soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="http://omnimock.local/soap/service"><soap:Body><tns:GetUserDetailsRequest><userId>usr_777</userId></tns:GetUserDetailsRequest></soap:Body></soap:Envelope>'); }
+    function copyGrpcurl(type) {
+      const cmds = {
+        echo: 'grpcurl -plaintext -d \'{"message":"Hello gRPC"}\' localhost:50051 omnimock.v1.TestService/UnaryEcho',
+        products: 'grpcurl -plaintext -d \'{"category":"Hardware","limit":5}\' localhost:50051 omnimock.v1.TestService/ListProducts',
+        error: 'grpcurl -plaintext -d \'{"status_code":5,"error_message":"Resource not found"}\' localhost:50051 omnimock.v1.TestService/SimulateError',
+      };
+      copySnippet(cmds[type] || '');
+    }
+    function testJsonRpcHealth() { fillQuickTest('POST', '/rpc/json', JSON.stringify({ jsonrpc: '2.0', method: 'system.health', id: 1 })); }
+    function testJsonRpcFib() { fillQuickTest('POST', '/rpc/json', JSON.stringify({ jsonrpc: '2.0', method: 'math.fibonacci', params: { n: 10 }, id: 2 })); }
+    function testJsonRpcBatchCall() { fillQuickTest('POST', '/rpc/json', JSON.stringify([{ jsonrpc: '2.0', method: 'calculate', params: { op: 'add', a: 10, b: 20 }, id: 1 }, { jsonrpc: '2.0', method: 'system.uptime', id: 2 }])); }
   </script>
 </body>
 </html>

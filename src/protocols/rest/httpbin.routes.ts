@@ -217,12 +217,13 @@ router.get('/brotli', (req: Request, res: Response) => {
 });
 
 // File Uploads
-router.post('/upload/multipart', upload.any(), (req: Request, res: Response) => {
+router.post('/upload/multipart', upload.any() as any, (req: Request, res: Response) => {
   const filesSummary = ((req.files as Express.Multer.File[]) || []).map(f => ({
     fieldname: f.fieldname,
     originalname: f.originalname,
     mimetype: f.mimetype,
     sizeBytes: f.size,
+    md5: crypto.createHash('md5').update(f.buffer).digest('hex'),
     sampleBase64: f.buffer.slice(0, 64).toString('base64'),
   }));
 
@@ -231,6 +232,175 @@ router.post('/upload/multipart', upload.any(), (req: Request, res: Response) => 
     fields: req.body,
     files: filesSummary,
     fileCount: filesSummary.length,
+  });
+});
+
+router.post('/upload/single', upload.single('file') as any, (req: Request, res: Response) => {
+  const file = req.file;
+  if (!file) {
+    return res.status(400).json({ error: 'No file uploaded. Send field "file".' });
+  }
+
+  res.json({
+    message: 'Single file uploaded successfully',
+    filename: file.originalname,
+    mimetype: file.mimetype,
+    sizeBytes: file.size,
+    md5: crypto.createHash('md5').update(file.buffer).digest('hex'),
+    fields: req.body,
+  });
+});
+
+// Search, Filtering & Pagination Simulator
+router.get('/search', (req: Request, res: Response) => {
+  const q = String(req.query.q || '').toLowerCase();
+  const page = Math.max(1, parseInt(req.query.page as string, 10) || 1);
+  const limit = Math.max(1, parseInt(req.query.limit as string, 10) || 10);
+  const sort = String(req.query.sort || 'id:asc');
+
+  const sampleItems = [
+    { id: 1, title: 'Cloud Gateway Pro', category: 'networking', price: 299.99, rating: 4.8 },
+    { id: 2, title: 'Edge Micro Server', category: 'hardware', price: 499.00, rating: 4.6 },
+    { id: 3, title: 'Mesh Router X', category: 'networking', price: 149.50, rating: 4.5 },
+    { id: 4, title: 'API Monitoring Agent', category: 'software', price: 79.99, rating: 4.9 },
+    { id: 5, title: 'Database Visualizer Suite', category: 'software', price: 120.00, rating: 4.7 },
+    { id: 6, title: 'Security Dongle Key', category: 'hardware', price: 45.00, rating: 4.3 },
+    { id: 7, title: 'Smart Sensor Hub', category: 'iot', price: 89.00, rating: 4.2 },
+    { id: 8, title: 'Ultra Switch 24-Port', category: 'networking', price: 349.99, rating: 4.9 },
+    { id: 9, title: 'Load Balancer Appliance', category: 'hardware', price: 899.00, rating: 4.8 },
+    { id: 10, title: 'GraphQL Gateway Shield', category: 'software', price: 199.00, rating: 4.9 },
+    { id: 11, title: 'Wireless Access Node', category: 'networking', price: 119.00, rating: 4.4 },
+    { id: 12, title: 'Telemetry Ingestion Agent', category: 'software', price: 59.99, rating: 4.7 },
+  ];
+
+  let filtered = sampleItems;
+  if (q) {
+    filtered = filtered.filter(item => 
+      item.title.toLowerCase().includes(q) || item.category.toLowerCase().includes(q)
+    );
+  }
+
+  const [sortField, sortOrder] = sort.split(':');
+  filtered.sort((a: any, b: any) => {
+    const valA = a[sortField];
+    const valB = b[sortField];
+    const dir = sortOrder === 'desc' ? -1 : 1;
+    if (valA < valB) return -1 * dir;
+    if (valA > valB) return 1 * dir;
+    return 0;
+  });
+
+  const total = filtered.length;
+  const startIndex = (page - 1) * limit;
+  const data = filtered.slice(startIndex, startIndex + limit);
+
+  res.json({
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+    query: { q, sort, page, limit },
+    data,
+  });
+});
+
+// File Download Streaming (CSV, JSON, SVG, Mock PDF)
+router.get('/download/:format', (req: Request, res: Response) => {
+  const format = (req.params.format || 'json').toLowerCase();
+
+  switch (format) {
+    case 'csv': {
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename="omnimock_report.csv"');
+      const csv = 'id,name,role,status\n1,Alice,Engineer,Active\n2,Bob,Architect,Active\n3,Charlie,Product,Pending\n';
+      return res.send(csv);
+    }
+    case 'svg': {
+      res.setHeader('Content-Type', 'image/svg+xml');
+      res.setHeader('Content-Disposition', 'inline; filename="badge.svg"');
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="40" viewBox="0 0 200 40">
+        <rect width="200" height="40" rx="8" fill="#0284c7"/>
+        <text x="100" y="25" fill="#ffffff" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">OmniMock Active</text>
+      </svg>`;
+      return res.send(svg);
+    }
+    case 'pdf': {
+      // Return a valid minimal PDF binary file
+      const minimalPdf = Buffer.from(
+        '%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Count 1/Kids[3 0 R]>>endobj\n3 0 obj<</Type/Page/MediaBox[0 0 300 144]/Parent 2 0 R/Resources<<>>>>endobj\nxref\n0 4\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n0000000115 00000 n \ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n218\n%%EOF\n',
+        'utf-8'
+      );
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'attachment; filename="omnimock_document.pdf"');
+      res.setHeader('Content-Length', minimalPdf.length);
+      return res.send(minimalPdf);
+    }
+    case 'json':
+    default: {
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', 'attachment; filename="omnimock_data.json"');
+      return res.json({
+        exportedAt: new Date().toISOString(),
+        format: 'json',
+        generator: 'OmniMock Protocol Sandbox',
+        records: [
+          { id: 'REC-001', type: 'REST', verified: true },
+          { id: 'REC-002', type: 'GraphQL', verified: true },
+          { id: 'REC-003', type: 'gRPC', verified: true },
+        ],
+      });
+    }
+  }
+});
+
+// Cache Validation (ETag & 304 Not Modified)
+router.get('/cache', (req: Request, res: Response) => {
+  const content = { message: 'Cacheable response from OmniMock', version: 'v1.4.2', lastUpdated: '2026-09-20' };
+  const etag = `"omnimock-${crypto.createHash('md5').update(JSON.stringify(content)).digest('hex').slice(0, 8)}"`;
+
+  res.setHeader('ETag', etag);
+  res.setHeader('Cache-Control', 'public, max-age=60');
+
+  if (req.headers['if-none-match'] === etag) {
+    return res.status(304).end();
+  }
+
+  res.status(200).json(content);
+});
+
+// Rate Limit Simulation
+let rateLimitHitCount = 0;
+let rateLimitResetTime = Date.now() + 60000;
+
+router.get('/rate-limit', (_req: Request, res: Response) => {
+  const now = Date.now();
+  if (now > rateLimitResetTime) {
+    rateLimitHitCount = 0;
+    rateLimitResetTime = now + 60000;
+  }
+
+  rateLimitHitCount++;
+  const maxLimit = 5;
+  const remaining = Math.max(0, maxLimit - rateLimitHitCount);
+  const resetSeconds = Math.ceil((rateLimitResetTime - now) / 1000);
+
+  res.setHeader('X-RateLimit-Limit', String(maxLimit));
+  res.setHeader('X-RateLimit-Remaining', String(remaining));
+  res.setHeader('X-RateLimit-Reset', String(resetSeconds));
+
+  if (rateLimitHitCount > maxLimit) {
+    res.setHeader('Retry-After', String(resetSeconds));
+    return res.status(429).json({
+      error: 'Too Many Requests',
+      message: `Rate limit quota exceeded. Limit is ${maxLimit} requests/min.`,
+      retryAfterSeconds: resetSeconds,
+    });
+  }
+
+  res.json({
+    status: 'success',
+    message: `Request allowed. Remaining: ${remaining}/${maxLimit}`,
+    quota: { limit: maxLimit, remaining, resetSeconds },
   });
 });
 

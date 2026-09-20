@@ -9,12 +9,16 @@ service TestService {
 
   // Server Streaming RPC
   rpc StreamTicks (StreamRequest) returns (stream TickResponse);
+  rpc ListProducts (ProductFilter) returns (stream ProductResponse);
 
   // Client Streaming RPC
   rpc RecordMetrics (stream MetricRequest) returns (MetricSummaryResponse);
 
   // Bidirectional Streaming RPC
   rpc ChatStream (stream ChatMessage) returns (stream ChatMessage);
+
+  // Error Simulation RPC
+  rpc SimulateError (ErrorRequest) returns (EchoResponse);
 }
 
 message EchoRequest {
@@ -70,4 +74,23 @@ message ChatMessage {
   string sender = 1;
   string content = 2;
   int64 timestamp = 3;
+}
+
+message ProductFilter {
+  string category = 1;
+  double max_price = 2;
+  int32 limit = 3;
+}
+
+message ProductResponse {
+  string id = 1;
+  string title = 2;
+  double price = 3;
+  string category = 4;
+  bool in_stock = 5;
+}
+
+message ErrorRequest {
+  int32 status_code = 1; // 3: INVALID_ARGUMENT, 5: NOT_FOUND, 7: PERMISSION_DENIED, 14: UNAVAILABLE
+  string error_message = 2;
 }

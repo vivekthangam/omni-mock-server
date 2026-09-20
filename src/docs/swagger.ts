@@ -103,6 +103,86 @@ export const openApiSpec = {
         responses: { 200: { description: 'Delayed response' } },
       },
     },
+    '/rest/search': {
+      get: {
+        summary: 'Search, filtering, sorting, and pagination simulator',
+        tags: ['REST'],
+        parameters: [
+          { name: 'q', in: 'query', schema: { type: 'string', example: 'gateway' } },
+          { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
+          { name: 'limit', in: 'query', schema: { type: 'integer', default: 5 } },
+          { name: 'sort', in: 'query', schema: { type: 'string', default: 'id:asc', example: 'price:desc' } },
+        ],
+        responses: { 200: { description: 'Paginated and filtered dataset' } },
+      },
+    },
+    '/rest/rate-limit': {
+      get: {
+        summary: 'Simulate API Rate Limiting & Quota (returns 429 after 5 requests/min)',
+        tags: ['REST'],
+        responses: {
+          200: { description: 'Request within quota' },
+          429: { description: 'Rate limit exceeded with Retry-After header' },
+        },
+      },
+    },
+    '/rest/cache': {
+      get: {
+        summary: 'HTTP Cache validation with ETag and If-None-Match (returns 304)',
+        tags: ['REST'],
+        parameters: [{ name: 'If-None-Match', in: 'header', schema: { type: 'string' } }],
+        responses: {
+          200: { description: 'Fresh cacheable content with ETag' },
+          304: { description: 'Not Modified (valid cache hit)' },
+        },
+      },
+    },
+    '/rest/download/{format}': {
+      get: {
+        summary: 'Stream file downloads (CSV, JSON, SVG, Mock PDF)',
+        tags: ['REST'],
+        parameters: [{ name: 'format', in: 'path', required: true, schema: { type: 'string', enum: ['csv', 'json', 'svg', 'pdf'] } }],
+        responses: { 200: { description: 'File binary stream' } },
+      },
+    },
+    '/rest/upload/single': {
+      post: {
+        summary: 'Upload single file via multipart/form-data',
+        tags: ['REST'],
+        requestBody: {
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                properties: { file: { type: 'string', format: 'binary' } },
+              },
+            },
+          },
+        },
+        responses: { 200: { description: 'File metadata and MD5 verification' } },
+      },
+    },
+    '/sse/stocks': {
+      get: {
+        summary: 'Server-Sent Events: Real-time fluctuating Stock Ticker',
+        tags: ['Realtime & Streaming'],
+        responses: { 200: { description: 'text/event-stream of trade ticks' } },
+      },
+    },
+    '/sse/notifications': {
+      get: {
+        summary: 'Server-Sent Events: System alerts and security notifications',
+        tags: ['Realtime & Streaming'],
+        responses: { 200: { description: 'text/event-stream of notifications' } },
+      },
+    },
+    '/sse/build-logs': {
+      get: {
+        summary: 'Server-Sent Events: Multi-step CI/CD build progress stream',
+        tags: ['Realtime & Streaming'],
+        responses: { 200: { description: 'text/event-stream of progress logs' } },
+      },
+    },
     '/faker/users': {
       get: {
         summary: 'Generate realistic mock users',
@@ -219,6 +299,6 @@ router.get('/openapi.json', (_req, res) => {
   res.json(openApiSpec);
 });
 
-router.use('/docs', swaggerUi.serve, swaggerUi.setup(openApiSpec));
+router.use('/docs', swaggerUi.serve as any, swaggerUi.setup(openApiSpec) as any);
 
 export default router;

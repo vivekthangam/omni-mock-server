@@ -161,6 +161,69 @@ const serviceImplementation = {
       call.end();
     });
   },
+
+  // 6. Server Streaming ListProducts
+  ListProducts: (call: any) => {
+    const filter = call.request || {};
+    const limit = Math.min(filter.limit || 5, 20);
+    const category = filter.category || '';
+    const maxPrice = filter.max_price || 9999;
+
+    auditService.record({
+      protocol: 'GRPC',
+      method: 'ListProducts (Streaming Products)',
+      path: '/omnimock.v1.TestService/ListProducts',
+      requestBody: filter,
+    });
+
+    const sampleProducts = [
+      { id: 'prod_1', title: 'Ultra Wireless Hub', price: 129.99, category: 'Hardware', in_stock: true },
+      { id: 'prod_2', title: 'Gigabit Switch 8P', price: 69.50, category: 'Hardware', in_stock: true },
+      { id: 'prod_3', title: 'API Monitoring License', price: 299.00, category: 'Software', in_stock: true },
+      { id: 'prod_4', title: 'Developer Workstation', price: 1499.00, category: 'Hardware', in_stock: false },
+      { id: 'prod_5', title: 'Mesh Beacon', price: 49.99, category: 'Hardware', in_stock: true },
+    ];
+
+    let count = 0;
+    const interval = setInterval(() => {
+      if (count >= limit || count >= sampleProducts.length) {
+        clearInterval(interval);
+        call.end();
+        return;
+      }
+      const prod = sampleProducts[count];
+      if (!category || prod.category.toLowerCase() === category.toLowerCase()) {
+        if (prod.price <= maxPrice) {
+          call.write(prod);
+        }
+      }
+      count++;
+    }, 200);
+
+    call.on('cancelled', () => {
+      clearInterval(interval);
+    });
+  },
+
+  // 7. Error Simulation
+  SimulateError: (call: any, callback: any) => {
+    const { status_code, error_message } = call.request;
+    const code = status_code || grpc.status.NOT_FOUND;
+    const message = error_message || 'Simulated gRPC error from OmniMock';
+
+    auditService.record({
+      protocol: 'GRPC',
+      method: 'SimulateError (Error Emitted)',
+      path: '/omnimock.v1.TestService/SimulateError',
+      requestBody: call.request,
+      responseStatus: code,
+    });
+
+    callback({
+      code,
+      message,
+    });
+  },
 };
 
 export function startGrpcServer(port: number): grpc.Server {

@@ -110,6 +110,57 @@ export function setupWebSocket(server: HttpServer) {
       return;
     }
 
+    // Route: /ws/crypto (Multi-Asset Market Stream)
+    if (pathname === '/ws/crypto') {
+      ws.send(JSON.stringify({ type: 'SUBSCRIBED', channel: 'crypto-markets', assets: ['BTC', 'ETH', 'SOL'] }));
+      const assets = [
+        { symbol: 'BTC/USD', base: 64250.0 },
+        { symbol: 'ETH/USD', base: 3450.0 },
+        { symbol: 'SOL/USD', base: 145.2 },
+      ];
+
+      const interval = setInterval(() => {
+        if (ws.readyState !== WebSocket.OPEN) {
+          clearInterval(interval);
+          return;
+        }
+        const asset = assets[Math.floor(Math.random() * assets.length)];
+        const delta = (Math.random() - 0.49) * (asset.base * 0.008);
+        asset.base = parseFloat((asset.base + delta).toFixed(2));
+
+        ws.send(JSON.stringify({
+          type: 'MARKET_TICK',
+          symbol: asset.symbol,
+          price: asset.base,
+          change24h: parseFloat((Math.random() * 5 - 2).toFixed(2)),
+          volume24h: Math.floor(Math.random() * 1000000) + 500000,
+          timestamp: new Date().toISOString(),
+        }));
+      }, 750);
+
+      ws.on('close', () => clearInterval(interval));
+      return;
+    }
+
+    // Route: /ws/ping (Ping / Pong Latency measurement)
+    if (pathname === '/ws/ping') {
+      ws.send(JSON.stringify({ type: 'READY', message: 'Send { "type": "ping", "clientTime": 1234567890 }' }));
+      ws.on('message', data => {
+        try {
+          const parsed = JSON.parse(data.toString());
+          ws.send(JSON.stringify({
+            type: 'PONG',
+            clientTime: parsed.clientTime,
+            serverTime: Date.now(),
+            echo: parsed,
+          }));
+        } catch {
+          ws.send(JSON.stringify({ type: 'PONG', serverTime: Date.now() }));
+        }
+      });
+      return;
+    }
+
     // Default fallback
     ws.send(JSON.stringify({ message: `Connected to WebSocket endpoint: ${pathname}` }));
   });
