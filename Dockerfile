@@ -36,6 +36,7 @@ ENV GRPC_PORT=50051
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
 COPY package.json ./
+RUN pnpm approve-builds
 RUN pnpm install --prod
 
 # Copy built code and assets from builder stage
