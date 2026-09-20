@@ -1,0 +1,9 @@
+packages:
+  - '.'
+
+strictDepBuilds: false
+
+allowBuilds:
+  esbuild: true
+  protobufjs: true
+  '@scarf/scarf': false

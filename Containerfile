@@ -3,10 +3,10 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Enable PNPM
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Enable PNPM (pinned for stability)
+RUN corepack enable && corepack prepare pnpm@10.19.0 --activate
 
-COPY package.json ./
+COPY package.json pnpm-workspace.yaml* .npmrc* ./
 RUN pnpm install
 
 COPY tsconfig.json ./
@@ -25,9 +25,9 @@ ENV NODE_ENV=production
 ENV PORT=3000
 ENV GRPC_PORT=50051
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@10.19.0 --activate
 
-COPY package.json ./
+COPY package.json pnpm-workspace.yaml* .npmrc* ./
 RUN pnpm install --prod
 
 COPY --from=builder /app/dist ./dist

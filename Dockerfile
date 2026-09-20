@@ -3,11 +3,11 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Install PNPM
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Install PNPM (pinned to avoid breaking changes)
+RUN corepack enable && corepack prepare pnpm@10.19.0 --activate
 
-# Copy dependency specifications
-COPY package.json ./
+# Copy dependency specifications and configuration
+COPY package.json pnpm-workspace.yaml* .npmrc* ./
 
 # Install all dependencies (including devDependencies for TypeScript build)
 RUN pnpm install
@@ -33,10 +33,9 @@ ENV PORT=3000
 ENV GRPC_PORT=50051
 
 # Install PNPM for production install
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@10.19.0 --activate
 
-COPY package.json ./
-RUN pnpm approve-builds
+COPY package.json pnpm-workspace.yaml* .npmrc* ./
 RUN pnpm install --prod
 
 # Copy built code and assets from builder stage
